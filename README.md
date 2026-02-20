@@ -9,7 +9,10 @@ Track your food industry job applications on an interactive map. Visualize your 
 
 ## Features
 
+- 🎨 **Premium Landing Page** — Elegant intro with parallax scrolling and section reveals
 - 🗺️ **Interactive Map** — Click anywhere to place markers, zoom & drag
+- 🔐 **User Authentication** — Secure Sign In and Sign Up with password hashing
+- 👁️ **Privacy Controls** — Toggle entries between Public and Private visibility
 - 📊 **Status Tracking** — Applied, Interview, Offered, Joined, Rejected
 - ⭐ **Multi-Rating System** — Rate salary, stability, and company culture (1–5)
 - 🏷️ **Sub-Sector Tags** — FMCG, Retail F&B, Manufacturing, Startup, etc.
@@ -19,45 +22,53 @@ Track your food industry job applications on an interactive map. Visualize your 
 
 ## Tech Stack
 
-| Layer     | Technology                          |
-|-----------|-------------------------------------|
-| Frontend  | React 19 + Vite + TypeScript        |
-| Styling   | Tailwind CSS v4                     |
-| Map       | Leaflet.js + react-leaflet          |
+| Layer     | Technology                           |
+|-----------|--------------------------------------|
+| Frontend  | React 19 + Vite + TypeScript         |
+| Styling   | Tailwind CSS v4                      |
+| Map       | Leaflet.js + react-leaflet           |
 | Backend   | Vercel Serverless Functions          |
-| ORM       | Prisma Client + Accelerate          |
+| Auth      | JWT (Jose) + Bcrypt.js               |
+| ORM       | Prisma Client + Accelerate           |
 | Database  | PostgreSQL (via Prisma Data Platform)|
-| Validation| Zod                                 |
+| Validation| Zod                                  |
 
 ## Project Structure
 
 ```
 /food-industry-job-tracker
-├── api/                    # Vercel serverless API routes
-│   ├── companies.ts        # GET all / POST new company
+├── api/                     # Vercel serverless API routes
+│   ├── auth/                # Registration, Login, and Me endpoints
+│   ├── companies.ts         # GET all / POST new company
 │   └── companies/
-│       └── [id].ts         # DELETE company by ID
+│       └── [id].ts          # DELETE / PATCH (visibility) company
 ├── prisma/
-│   ├── schema.prisma       # Database schema
-│   └── migrations/         # Database migrations
+│   ├── schema.prisma        # Database schema
+│   └── migrations/          # Database migrations
 ├── src/
 │   ├── components/
-│   │   ├── MapView.tsx     # Interactive Leaflet map with markers
-│   │   ├── Sidebar.tsx     # Collapsible sidebar panel
-│   │   ├── CompanyForm.tsx # Add company form with star ratings
-│   │   ├── CompanyList.tsx # Tracked companies list
-│   │   └── StatusFilter.tsx# Filter markers by status
+│   │   ├── LandingPage.tsx  # Premium intro page
+│   │   ├── AuthPage.tsx     # Sign In / Sign Up UI
+│   │   ├── MapView.tsx      # Interactive Leaflet map
+│   │   ├── Sidebar.tsx      # Collapsible sidebar panel
+│   │   ├── CompanyForm.tsx  # Add company form with visibility toggle
+│   │   ├── CompanyList.tsx  # Tracked companies with visibility badges
+│   │   └── StatusFilter.tsx # Filter markers by status
+│   ├── context/
+│   │   └── AuthContext.tsx  # Global authentication state manager
 │   ├── lib/
-│   │   ├── api.ts          # Frontend API client
-│   │   └── prisma.ts       # Prisma client singleton
+│   │   ├── api.ts           # Frontend API client (auth & companies)
+│   │   ├── jwt.ts           # Server-side JWT utilities
+│   │   └── prisma.ts        # Prisma client singleton
 │   ├── types/
-│   │   └── company.ts      # TypeScript interfaces & enums
-│   ├── App.tsx             # Main application component
-│   ├── main.tsx            # Entry point
-│   └── index.css           # Global styles & theme
-├── .env                    # Environment variables
-├── vercel.json             # Vercel deployment config
-├── vite.config.ts          # Vite configuration
+│   │   └── company.ts       # TypeScript interfaces (User & Company)
+│   ├── App.tsx              # Main routing & state logic
+│   ├── main.tsx             # Entry point
+│   └── index.css            # Global styles & premium animations
+├── .env                     # Environment variables
+├── vercel.json              # Vercel deployment config
+├── vite.config.ts           # Vite configuration
+├── dev-server.ts            # Local API development server
 └── package.json
 ```
 
@@ -78,25 +89,38 @@ Track your food industry job applications on an interactive map. Visualize your 
    ```
 
 2. **Configure environment:**
-   Create `.env` file with your Prisma Accelerate connection string:
+   Create a `.env` file in the root directory. You need to provide your Prisma Data Platform account details for the database and a secret key for JWT:
+
    ```env
-   DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key=YOUR_API_KEY"
+   # 1. DATABASE_URL
+   # Get this from your Prisma Console (https://console.prisma.io)
+   # Click on your project -> Environment Variables -> Accelerated URL
+   DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key=YOUR_PRISMA_ACCELERATE_API_KEY"
+
+   # 2. JWT_SECRET
+   # Enter any strong random string here to sign your authentication tokens
+   JWT_SECRET="your-super-long-random-secret-key-here"
    ```
 
 3. **Generate Prisma Client and run migration:**
    ```bash
    npx prisma generate
-   npx prisma migrate dev --name init
+   npx prisma migrate dev --name add_auth
    ```
 
-4. **Start development server:**
+4. **Start the local API development server:**
+   Because this project uses Vercel serverless functions, we use a custom dev server for local API testing:
+   ```bash
+   npx tsx dev-server.ts
+   ```
+
+5. **Start the Vite frontend:**
+   Open another terminal and run:
    ```bash
    npm run dev
    ```
    
    The app will be available at `http://localhost:5173`
-
-> **Note:** The Vite dev server proxies `/api` requests. For local API testing, you'll need to deploy to Vercel or use `vercel dev`.
 
 ## Deploy to Vercel
 
@@ -110,8 +134,9 @@ Track your food industry job applications on an interactive map. Visualize your 
    vercel
    ```
 
-3. **Set environment variables** in Vercel dashboard:
-   - `DATABASE_URL` → Your Prisma Accelerate connection string
+3. **Set environment variables** in the Vercel dashboard:
+   - `DATABASE_URL` → Your Prisma Accelerate Accelerated URL
+   - `JWT_SECRET` → A strong random string for auth tokens
 
 4. **Done!** The build command automatically runs `prisma generate` before building.
 
@@ -134,7 +159,7 @@ Create a new company.
   "ratingSalary": 4,
   "ratingStability": 3,
   "ratingCulture": 5,
-  "notes": "HR friendly, lokasi jauh"
+  "notes": "HR friendly, lokasi oke"
 }
 ```
 
@@ -143,12 +168,12 @@ Delete a company by ID.
 
 ## Marker Colors
 
-| Status              | Color  |
-|---------------------|--------|
-| JOINED / OFFERED    | 🟢 Green |
-| INTERVIEW           | 🟡 Yellow |
-| APPLIED             | ⚪ Gray   |
-| REJECTED            | 🔴 Red    |
+| Status              | Color        |
+|---------------------|--------------|
+| JOINED / OFFERED    | 🟢 Green     |
+| INTERVIEW           | 🟡 Yellow    |
+| APPLIED             | ⚪ Gray      |
+| REJECTED            | 🔴 Red       |
 
 ## License
 
