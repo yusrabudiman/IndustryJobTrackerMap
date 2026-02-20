@@ -9,6 +9,7 @@ interface MapViewProps {
     filteredStatuses: CompanyStatus[]
     onMapClick: (lat: number, lng: number) => void
     selectedCoords: { lat: number; lng: number } | null
+    focusCompany: Company | null
 }
 
 function createColoredIcon(color: string): L.DivIcon {
@@ -84,6 +85,19 @@ function MapResizer() {
     return null
 }
 
+function MapFocusHandler({ company }: { company: Company | null }) {
+    const map = useMap()
+    useEffect(() => {
+        if (company) {
+            map.flyTo([company.latitude, company.longitude], 12, {
+                duration: 1.5,
+                easeLinearity: 0.25
+            })
+        }
+    }, [company, map])
+    return null
+}
+
 function getAverageRating(company: Company): string {
     const avg = (company.ratingSalary + company.ratingStability + company.ratingCulture) / 3
     return avg.toFixed(1)
@@ -93,7 +107,7 @@ function renderStars(rating: number): string {
     return '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating))
 }
 
-export default function MapView({ companies, filteredStatuses, onMapClick, selectedCoords }: MapViewProps) {
+export default function MapView({ companies, filteredStatuses, onMapClick, selectedCoords, focusCompany }: MapViewProps) {
     const filtered = companies.filter((c) => filteredStatuses.includes(c.status as CompanyStatus))
 
     return (
@@ -109,6 +123,7 @@ export default function MapView({ companies, filteredStatuses, onMapClick, selec
             />
             <MapClickHandler onClick={onMapClick} />
             <MapResizer />
+            <MapFocusHandler company={focusCompany} />
 
             {selectedCoords && (
                 <Marker position={[selectedCoords.lat, selectedCoords.lng]} icon={clickIcon} />

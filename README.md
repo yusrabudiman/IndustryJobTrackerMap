@@ -10,6 +10,7 @@ Track your food industry job applications on an interactive map. Visualize your 
 ## Features
 
 - 🎨 **Premium Landing Page** — Elegant intro with parallax scrolling and section reveals
+- 🔍 **Interactive Search** — Easily find companies and locations with auto-suggest search
 - 🗺️ **Interactive Map** — Click anywhere to place markers, zoom & drag
 - 🔐 **User Authentication** — Secure Sign In and Sign Up with password hashing
 - 👁️ **Privacy Controls** — Toggle entries between Public and Private visibility
@@ -49,6 +50,7 @@ Track your food industry job applications on an interactive map. Visualize your 
 │   ├── components/
 │   │   ├── LandingPage.tsx  # Premium intro page
 │   │   ├── AuthPage.tsx     # Sign In / Sign Up UI
+│   │   ├── LocationSearch.tsx # Search for companies & locations
 │   │   ├── MapView.tsx      # Interactive Leaflet map
 │   │   ├── Sidebar.tsx      # Collapsible sidebar panel
 │   │   ├── CompanyForm.tsx  # Add company form with visibility toggle

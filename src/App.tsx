@@ -6,6 +6,7 @@ import CompanyList from './components/CompanyList'
 import StatusFilter from './components/StatusFilter'
 import AuthPage from './components/AuthPage'
 import LandingPage from './components/LandingPage'
+import LocationSearch from './components/LocationSearch'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { getCompanies, createCompany, deleteCompany, toggleCompanyVisibility } from './lib/api'
 import type { Company, CompanyInput } from './types/company'
@@ -16,6 +17,7 @@ function Dashboard() {
     const [companies, setCompanies] = useState<Company[]>([])
     const [sidebarOpen, setSidebarOpen] = useState(true)
     const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number } | null>(null)
+    const [focusCompany, setFocusCompany] = useState<Company | null>(null)
     const [filteredStatuses, setFilteredStatuses] = useState<CompanyStatus[]>(Object.values(CompanyStatus))
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isDeleting, setIsDeleting] = useState<string | null>(null)
@@ -73,7 +75,14 @@ function Dashboard() {
 
     function handleMapClick(lat: number, lng: number) {
         setSelectedCoords({ lat, lng })
+        setFocusCompany(null)
         if (!sidebarOpen) setSidebarOpen(true)
+    }
+
+    function handleSelectCompany(company: Company) {
+        setFocusCompany(company)
+        setSelectedCoords(null)
+        // Optionally close search or handle other UI
     }
 
     return (
@@ -84,6 +93,7 @@ function Dashboard() {
                 filteredStatuses={filteredStatuses}
                 onMapClick={handleMapClick}
                 selectedCoords={selectedCoords}
+                focusCompany={focusCompany}
             />
 
             {/* Sidebar */}
@@ -107,6 +117,12 @@ function Dashboard() {
                         </svg>
                     </button>
                 </div>
+
+                {/* Search */}
+                <LocationSearch
+                    companies={companies}
+                    onSelect={handleSelectCompany}
+                />
 
                 {/* Error toast */}
                 {error && (
@@ -148,6 +164,7 @@ function Dashboard() {
                     companies={companies}
                     onDelete={handleDelete}
                     onToggleVisibility={handleToggleVisibility}
+                    onSelect={handleSelectCompany}
                     isDeleting={isDeleting}
                     currentUserId={user?.id || null}
                 />

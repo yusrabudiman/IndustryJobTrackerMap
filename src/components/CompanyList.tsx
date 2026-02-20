@@ -5,6 +5,7 @@ interface CompanyListProps {
     companies: Company[]
     onDelete: (id: string) => void
     onToggleVisibility: (id: string, isPublic: boolean) => void
+    onSelect: (company: Company) => void
     isDeleting: string | null
     currentUserId: string | null
 }
@@ -13,7 +14,7 @@ function getAverageRating(c: Company): string {
     return ((c.ratingSalary + c.ratingStability + c.ratingCulture) / 3).toFixed(1)
 }
 
-export default function CompanyList({ companies, onDelete, onToggleVisibility, isDeleting, currentUserId }: CompanyListProps) {
+export default function CompanyList({ companies, onDelete, onToggleVisibility, onSelect, isDeleting, currentUserId }: CompanyListProps) {
     if (companies.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -39,7 +40,8 @@ export default function CompanyList({ companies, onDelete, onToggleVisibility, i
                     return (
                         <div
                             key={company.id}
-                            className="group p-3 rounded-xl bg-surface/70 border border-border/30 hover:border-border/60 transition-all duration-200 hover:bg-surface-lighter/30"
+                            onClick={() => onSelect(company)}
+                            className="group p-3 rounded-xl bg-surface/70 border border-border/30 hover:border-primary/40 transition-all duration-200 hover:bg-surface-lighter/30 cursor-pointer active:scale-[0.98]"
                         >
                             <div className="flex items-start justify-between gap-2 mb-2">
                                 <div className="flex-1 min-w-0">
@@ -94,8 +96,8 @@ export default function CompanyList({ companies, onDelete, onToggleVisibility, i
                                 </span>
                                 {/* Visibility badge */}
                                 <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${company.isPublic
-                                        ? 'bg-success/15 text-success border border-success/30'
-                                        : 'bg-surface-lighter/50 text-text-muted/60 border border-border/30'
+                                    ? 'bg-success/15 text-success border border-success/30'
+                                    : 'bg-surface-lighter/50 text-text-muted/60 border border-border/30'
                                     }`}>
                                     {company.isPublic ? 'Public' : 'Private'}
                                 </span>
