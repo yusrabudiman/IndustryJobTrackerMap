@@ -12,6 +12,7 @@ Track your food industry job applications on an interactive map. Visualize your 
 - 🎨 **Premium Landing Page** — Elegant intro with parallax scrolling and section reveals
 - 🔍 **Interactive Search** — Easily find companies and locations with auto-suggest search
 - 🗺️ **Interactive Map** — Click anywhere to place markers, zoom & drag
+- 🌓 **Dynamic Themes** — High-quality Light and Dark mode support
 - 🔐 **User Authentication** — Secure Sign In and Sign Up with password hashing
 - 👁️ **Privacy Controls** — Toggle entries between Public and Private visibility
 - 📊 **Status Tracking** — Applied, Interview, Offered, Joined, Rejected

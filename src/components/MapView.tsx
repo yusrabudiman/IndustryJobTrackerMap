@@ -107,8 +107,15 @@ function renderStars(rating: number): string {
     return '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating))
 }
 
+import { useTheme } from '../context/ThemeContext'
+
 export default function MapView({ companies, filteredStatuses, onMapClick, selectedCoords, focusCompany }: MapViewProps) {
+    const { theme } = useTheme()
     const filtered = companies.filter((c) => filteredStatuses.includes(c.status as CompanyStatus))
+
+    const tileUrl = theme === 'dark'
+        ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
 
     return (
         <MapContainer
@@ -119,7 +126,7 @@ export default function MapView({ companies, filteredStatuses, onMapClick, selec
         >
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                url={tileUrl}
             />
             <MapClickHandler onClick={onMapClick} />
             <MapResizer />
@@ -136,55 +143,48 @@ export default function MapView({ companies, filteredStatuses, onMapClick, selec
                     icon={createColoredIcon(STATUS_COLORS[company.status as CompanyStatus])}
                 >
                     <Popup>
-                        <div style={{ minWidth: '200px', padding: '4px' }}>
-                            <h3 style={{
-                                fontSize: '16px',
-                                fontWeight: 700,
-                                marginBottom: '8px',
-                                color: '#f8fafc',
-                                borderBottom: '1px solid #334155',
-                                paddingBottom: '8px'
-                            }}>
+                        <div className="min-w-[200px] p-1">
+                            <h3 className="text-base font-bold mb-2 pb-2 border-b border-border/30 text-text">
                                 {company.name}
                             </h3>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span style={{ color: '#94a3b8' }}>Status</span>
+                            <div className="flex flex-col gap-1.5 text-sm">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-text-muted">Status</span>
                                     <span style={{
                                         background: STATUS_COLORS[company.status as CompanyStatus] + '22',
                                         color: STATUS_COLORS[company.status as CompanyStatus],
                                         padding: '2px 10px',
                                         borderRadius: '12px',
                                         fontWeight: 600,
-                                        fontSize: '12px',
+                                        fontSize: '11px',
                                         border: `1px solid ${STATUS_COLORS[company.status as CompanyStatus]}44`
                                     }}>
                                         {STATUS_LABELS[company.status as CompanyStatus]}
                                     </span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ color: '#94a3b8' }}>Sub-Sector</span>
-                                    <span style={{ color: '#e2e8f0', fontWeight: 500 }}>{company.subSector}</span>
+                                {company.user && (
+                                    <div className="flex justify-between items-center opacity-80 py-0.5">
+                                        <span className="text-text-muted text-[11px]">Pinned by</span>
+                                        <span className="text-primary font-bold text-[11px] truncate max-w-[120px] text-right">
+                                            {company.user.name}
+                                        </span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between">
+                                    <span className="text-text-muted">Sub-Sector</span>
+                                    <span className="text-text font-medium opacity-90">{company.subSector}</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span style={{ color: '#94a3b8' }}>Rating</span>
-                                    <span style={{ color: '#fbbf24', letterSpacing: '2px' }}>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-text-muted">Rating</span>
+                                    <span className="text-warning letter-spacing-[2px]">
                                         {renderStars(parseFloat(getAverageRating(company)))}
-                                        <span style={{ color: '#e2e8f0', marginLeft: '6px', letterSpacing: '0' }}>
+                                        <span className="text-text-muted ml-1.5 opacity-80 letter-spacing-0">
                                             {getAverageRating(company)}
                                         </span>
                                     </span>
                                 </div>
                                 {company.notes && (
-                                    <div style={{
-                                        marginTop: '4px',
-                                        padding: '8px',
-                                        background: '#0f172a',
-                                        borderRadius: '8px',
-                                        fontSize: '12px',
-                                        color: '#cbd5e1',
-                                        lineHeight: '1.5'
-                                    }}>
+                                    <div className="mt-1 p-2 bg-surface-lighter/50 rounded-lg text-xs text-text-muted leading-relaxed border border-border/20">
                                         📝 {company.notes}
                                     </div>
                                 )}

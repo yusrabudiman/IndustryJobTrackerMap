@@ -58,7 +58,7 @@ export default function Sidebar({ isOpen, onToggle, children }: SidebarProps) {
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
             >
                 {/* Header */}
-                <div className="sticky top-0 z-10 px-5 pt-5 pb-4 border-b border-border/30 bg-surface-light/90 backdrop-blur-md">
+                <div className="sticky top-0 z-10 px-5 pt-5 pb-4 border-b border-border/30 bg-surface-light backdrop-blur-md">
                     <div className="flex items-center gap-3 ml-12">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-xl shadow-lg shadow-primary/20">
                             🍔

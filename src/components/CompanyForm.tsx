@@ -32,6 +32,7 @@ function StarRating({ value, onChange, label }: { value: number; onChange: (v: n
 export default function CompanyForm({ selectedCoords, onSubmit, isSubmitting }: CompanyFormProps) {
     const [name, setName] = useState('')
     const [subSector, setSubSector] = useState<string>(SUB_SECTORS[0])
+    const [customSubSector, setCustomSubSector] = useState('')
     const [status, setStatus] = useState<CompanyStatus>(CompanyStatus.APPLIED)
     const [ratingSalary, setRatingSalary] = useState(3)
     const [ratingStability, setRatingStability] = useState(3)
@@ -45,7 +46,7 @@ export default function CompanyForm({ selectedCoords, onSubmit, isSubmitting }: 
 
         await onSubmit({
             name,
-            subSector,
+            subSector: subSector === 'Other...' ? customSubSector : subSector,
             latitude: selectedCoords.lat,
             longitude: selectedCoords.lng,
             status,
@@ -59,6 +60,7 @@ export default function CompanyForm({ selectedCoords, onSubmit, isSubmitting }: 
         // Reset form
         setName('')
         setSubSector(SUB_SECTORS[0])
+        setCustomSubSector('')
         setStatus(CompanyStatus.APPLIED)
         setRatingSalary(3)
         setRatingStability(3)
@@ -95,15 +97,35 @@ export default function CompanyForm({ selectedCoords, onSubmit, isSubmitting }: 
             {/* Sub-Sector */}
             <div>
                 <label className="block text-sm font-medium text-text-muted mb-1.5">Sub-Sector *</label>
-                <select
-                    value={subSector}
-                    onChange={(e) => setSubSector(e.target.value)}
-                    className={selectClasses}
-                >
-                    {SUB_SECTORS.map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                    ))}
-                </select>
+                <div className="flex flex-col gap-2">
+                    <select
+                        value={subSector}
+                        onChange={(e) => {
+                            setSubSector(e.target.value)
+                            if (e.target.value !== 'Other...') {
+                                setCustomSubSector('')
+                            }
+                        }}
+                        className={selectClasses}
+                    >
+                        {SUB_SECTORS.map((s) => (
+                            <option key={s} value={s}>{s}</option>
+                        ))}
+                        <option value="Other...">Other...</option>
+                    </select>
+
+                    {subSector === 'Other...' && (
+                        <input
+                            type="text"
+                            value={customSubSector}
+                            onChange={(e) => setCustomSubSector(e.target.value)}
+                            placeholder="Type custom sub-sector..."
+                            required
+                            className={inputClasses}
+                            autoFocus
+                        />
+                    )}
+                </div>
             </div>
 
             {/* Coordinates */}
@@ -179,8 +201,8 @@ export default function CompanyForm({ selectedCoords, onSubmit, isSubmitting }: 
                     type="button"
                     onClick={() => setIsPublic(!isPublic)}
                     className={`relative w-12 h-6 rounded-full transition-all duration-300 cursor-pointer ${isPublic
-                            ? 'bg-gradient-to-r from-primary to-primary-light'
-                            : 'bg-surface-lighter'
+                        ? 'bg-gradient-to-r from-primary to-primary-light'
+                        : 'bg-surface-lighter'
                         }`}
                 >
                     <span
@@ -193,7 +215,7 @@ export default function CompanyForm({ selectedCoords, onSubmit, isSubmitting }: 
             {/* Submit */}
             <button
                 type="submit"
-                disabled={!selectedCoords || !name || isSubmitting}
+                disabled={!selectedCoords || !name || isSubmitting || (subSector === 'Other...' && !customSubSector.trim())}
                 className="w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-300 cursor-pointer
           bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary
           text-white shadow-lg shadow-primary/25 hover:shadow-primary/40
