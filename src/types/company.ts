@@ -17,10 +17,24 @@ export interface Company {
     ratingStability: number
     ratingCulture: number
     notes: string | null
+    isPublic: boolean
     createdAt: string
+    userId: string
+    user?: { name: string }
 }
 
-export type CompanyInput = Omit<Company, 'id' | 'createdAt'>
+export type CompanyInput = Omit<Company, 'id' | 'createdAt' | 'userId' | 'user'>
+
+export interface User {
+    id: string
+    name: string
+    email: string
+}
+
+export interface AuthResponse {
+    token: string
+    user: User
+}
 
 export const STATUS_COLORS: Record<CompanyStatus, string> = {
     [CompanyStatus.JOINED]: '#22c55e',

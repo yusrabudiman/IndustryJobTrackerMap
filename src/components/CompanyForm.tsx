@@ -37,6 +37,7 @@ export default function CompanyForm({ selectedCoords, onSubmit, isSubmitting }: 
     const [ratingStability, setRatingStability] = useState(3)
     const [ratingCulture, setRatingCulture] = useState(3)
     const [notes, setNotes] = useState('')
+    const [isPublic, setIsPublic] = useState(false)
 
     async function handleSubmit(e: FormEvent) {
         e.preventDefault()
@@ -52,6 +53,7 @@ export default function CompanyForm({ selectedCoords, onSubmit, isSubmitting }: 
             ratingStability,
             ratingCulture,
             notes: notes || null,
+            isPublic,
         })
 
         // Reset form
@@ -62,6 +64,7 @@ export default function CompanyForm({ selectedCoords, onSubmit, isSubmitting }: 
         setRatingStability(3)
         setRatingCulture(3)
         setNotes('')
+        setIsPublic(false)
     }
 
     const inputClasses = 'w-full bg-surface rounded-lg border border-border/50 px-3 py-2.5 text-sm text-text placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200'
@@ -162,6 +165,29 @@ export default function CompanyForm({ selectedCoords, onSubmit, isSubmitting }: 
                     rows={3}
                     className={`${inputClasses} resize-none`}
                 />
+            </div>
+
+            {/* Visibility Toggle */}
+            <div className="flex items-center justify-between p-3 rounded-lg bg-surface/60 border border-border/30">
+                <div>
+                    <p className="text-sm font-medium text-text">Visibility</p>
+                    <p className="text-xs text-text-muted mt-0.5">
+                        {isPublic ? '🌍 Visible to everyone' : '🔒 Only visible to you'}
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    onClick={() => setIsPublic(!isPublic)}
+                    className={`relative w-12 h-6 rounded-full transition-all duration-300 cursor-pointer ${isPublic
+                            ? 'bg-gradient-to-r from-primary to-primary-light'
+                            : 'bg-surface-lighter'
+                        }`}
+                >
+                    <span
+                        className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-300 ${isPublic ? 'translate-x-6' : 'translate-x-0'
+                            }`}
+                    />
+                </button>
             </div>
 
             {/* Submit */}

@@ -4,6 +4,9 @@ import http from 'http'
 // Import Vercel-style handlers
 import companiesHandler from './api/companies'
 import companyByIdHandler from './api/companies/[id]'
+import registerHandler from './api/auth/register'
+import loginHandler from './api/auth/login'
+import meHandler from './api/auth/me'
 
 const PORT = 3001
 
@@ -72,6 +75,24 @@ const server = http.createServer(async (req, res) => {
     const mockRes = createMockRes(res)
 
     try {
+        // Route: /api/auth/register
+        if (pathname === '/api/auth/register') {
+            await registerHandler(mockReq, mockRes)
+            return
+        }
+
+        // Route: /api/auth/login
+        if (pathname === '/api/auth/login') {
+            await loginHandler(mockReq, mockRes)
+            return
+        }
+
+        // Route: /api/auth/me
+        if (pathname === '/api/auth/me') {
+            await meHandler(mockReq, mockRes)
+            return
+        }
+
         // Route: /api/companies/:id
         const idMatch = pathname.match(/^\/api\/companies\/([^/]+)$/)
         if (idMatch) {

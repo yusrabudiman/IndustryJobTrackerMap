@@ -15,6 +15,15 @@ enum CompanyStatus {
   REJECTED
 }
 
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String
+  password  String
+  createdAt DateTime  @default(now())
+  companies Company[]
+}
+
 model Company {
   id              String        @id @default(cuid())
   name            String
@@ -26,5 +35,10 @@ model Company {
   ratingStability Int
   ratingCulture   Int
   notes           String?
+  isPublic        Boolean       @default(false)
   createdAt       DateTime      @default(now())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

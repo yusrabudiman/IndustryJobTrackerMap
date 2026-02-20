@@ -4,11 +4,15 @@ import Sidebar from './components/Sidebar'
 import CompanyForm from './components/CompanyForm'
 import CompanyList from './components/CompanyList'
 import StatusFilter from './components/StatusFilter'
-import { getCompanies, createCompany, deleteCompany } from './lib/api'
+import AuthPage from './components/AuthPage'
+import LandingPage from './components/LandingPage'
+import { AuthProvider, useAuth } from './context/AuthContext'
+import { getCompanies, createCompany, deleteCompany, toggleCompanyVisibility } from './lib/api'
 import type { Company, CompanyInput } from './types/company'
 import { CompanyStatus } from './types/company'
 
-export default function App() {
+function Dashboard() {
+    const { user, logout } = useAuth()
     const [companies, setCompanies] = useState<Company[]>([])
     const [sidebarOpen, setSidebarOpen] = useState(true)
     const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number } | null>(null)
@@ -58,6 +62,15 @@ export default function App() {
         }
     }
 
+    async function handleToggleVisibility(id: string, isPublic: boolean) {
+        try {
+            await toggleCompanyVisibility(id, isPublic)
+            await loadCompanies()
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to update visibility')
+        }
+    }
+
     function handleMapClick(lat: number, lng: number) {
         setSelectedCoords({ lat, lng })
         if (!sidebarOpen) setSidebarOpen(true)
@@ -75,6 +88,26 @@ export default function App() {
 
             {/* Sidebar */}
             <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)}>
+                {/* User Info Bar */}
+                <div className="user-bar">
+                    <div className="user-bar-info">
+                        <div className="user-avatar">
+                            {user?.name?.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="user-details">
+                            <span className="user-name">{user?.name}</span>
+                            <span className="user-email">{user?.email}</span>
+                        </div>
+                    </div>
+                    <button onClick={logout} className="logout-btn" title="Sign Out">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                    </button>
+                </div>
+
                 {/* Error toast */}
                 {error && (
                     <div className="p-3 rounded-lg bg-danger/15 border border-danger/30 text-danger text-xs flex items-start gap-2">
@@ -114,9 +147,52 @@ export default function App() {
                 <CompanyList
                     companies={companies}
                     onDelete={handleDelete}
+                    onToggleVisibility={handleToggleVisibility}
                     isDeleting={isDeleting}
+                    currentUserId={user?.id || null}
                 />
             </Sidebar>
         </div>
+    )
+}
+
+type AppPage = 'landing' | 'auth' | 'dashboard'
+
+function AppContent() {
+    const { user, isLoading } = useAuth()
+    const [page, setPage] = useState<AppPage>('landing')
+
+    // When user logs in, automatically go to dashboard
+    useEffect(() => {
+        if (user) setPage('dashboard')
+    }, [user])
+
+    if (isLoading) {
+        return (
+            <div className="loading-screen">
+                <div className="loading-spinner" />
+                <p className="loading-text">Loading...</p>
+            </div>
+        )
+    }
+
+    // If user is logged in, always show dashboard
+    if (user) {
+        return <Dashboard />
+    }
+
+    // Not logged in: show landing or auth
+    if (page === 'auth') {
+        return <AuthPage onBackToLanding={() => setPage('landing')} />
+    }
+
+    return <LandingPage onGetStarted={() => setPage('auth')} />
+}
+
+export default function App() {
+    return (
+        <AuthProvider>
+            <AppContent />
+        </AuthProvider>
     )
 }
