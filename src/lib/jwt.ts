@@ -1,8 +1,10 @@
 import { SignJWT, jwtVerify } from 'jose'
 
-const JWT_SECRET = new TextEncoder().encode(
-    process.env.JWT_SECRET || 'job-tracker-secret-key-change-in-production-2026'
-)
+const secret = process.env.JWT_SECRET
+if (!secret) {
+    throw new Error('JWT_SECRET must be defined in .env')
+}
+const JWT_SECRET = new TextEncoder().encode(secret)
 
 export interface JWTPayload {
     userId: string
