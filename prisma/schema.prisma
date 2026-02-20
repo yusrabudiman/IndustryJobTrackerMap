@@ -7,14 +7,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum CompanyStatus {
-  APPLIED
-  INTERVIEW
-  OFFERED
-  JOINED
-  REJECTED
-}
-
 model User {
   id        String    @id @default(cuid())
   email     String    @unique
@@ -35,10 +27,18 @@ model Company {
   ratingStability Int
   ratingCulture   Int
   notes           String?
-  isPublic        Boolean       @default(false)
   createdAt       DateTime      @default(now())
+  isPublic        Boolean       @default(false)
   userId          String
   user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+enum CompanyStatus {
+  APPLIED
+  INTERVIEW
+  OFFERED
+  JOINED
+  REJECTED
 }

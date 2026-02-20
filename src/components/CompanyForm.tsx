@@ -1,9 +1,11 @@
-import { useState, type FormEvent } from 'react'
-import type { CompanyInput } from '../types/company'
+import { useState, useEffect, type FormEvent } from 'react'
+import type { CompanyInput, Company } from '../types/company'
 import { CompanyStatus, SUB_SECTORS, STATUS_LABELS } from '../types/company'
 
 interface CompanyFormProps {
     selectedCoords: { lat: number; lng: number } | null
+    editingCompany?: Company | null
+    onCancelEdit?: () => void
     onSubmit: (data: CompanyInput) => Promise<void>
     isSubmitting: boolean
 }
@@ -29,7 +31,7 @@ function StarRating({ value, onChange, label }: { value: number; onChange: (v: n
     )
 }
 
-export default function CompanyForm({ selectedCoords, onSubmit, isSubmitting }: CompanyFormProps) {
+export default function CompanyForm({ selectedCoords, editingCompany, onCancelEdit, onSubmit, isSubmitting }: CompanyFormProps) {
     const [name, setName] = useState('')
     const [subSector, setSubSector] = useState<string>(SUB_SECTORS[0])
     const [customSubSector, setCustomSubSector] = useState('')
@@ -40,15 +42,40 @@ export default function CompanyForm({ selectedCoords, onSubmit, isSubmitting }: 
     const [notes, setNotes] = useState('')
     const [isPublic, setIsPublic] = useState(false)
 
+    // Sync form with editingCompany
+    useEffect(() => {
+        if (editingCompany) {
+            setName(editingCompany.name)
+            const isStandard = (SUB_SECTORS as readonly string[]).includes(editingCompany.subSector)
+            setSubSector((isStandard ? editingCompany.subSector : 'Other...') as any)
+            setCustomSubSector(isStandard ? '' : editingCompany.subSector)
+            setStatus(editingCompany.status as CompanyStatus)
+            setRatingSalary(editingCompany.ratingSalary)
+            setRatingStability(editingCompany.ratingStability)
+            setRatingCulture(editingCompany.ratingCulture)
+            setNotes(editingCompany.notes || '')
+            setIsPublic(editingCompany.isPublic)
+        }
+    }, [editingCompany])
+
     async function handleSubmit(e: FormEvent) {
         e.preventDefault()
-        if (!selectedCoords) return
+
+        // In edit mode, use the company's existing coordinates if the user
+        // hasn't clicked the map to set new ones
+        const coordsToUse = selectedCoords ?? (
+            editingCompany
+                ? { lat: editingCompany.latitude, lng: editingCompany.longitude }
+                : null
+        )
+
+        if (!coordsToUse) return  // Only block if truly no coords at all
 
         await onSubmit({
             name,
-            subSector: subSector === 'Other...' ? customSubSector : subSector,
-            latitude: selectedCoords.lat,
-            longitude: selectedCoords.lng,
+            subSector: (subSector === 'Other...' ? customSubSector : subSector) as any,
+            latitude: coordsToUse.lat,
+            longitude: coordsToUse.lng,
             status,
             ratingSalary,
             ratingStability,
@@ -69,17 +96,28 @@ export default function CompanyForm({ selectedCoords, onSubmit, isSubmitting }: 
         setIsPublic(false)
     }
 
-    const inputClasses = 'w-full bg-surface rounded-lg border border-border/50 px-3 py-2.5 text-sm text-text placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200'
+    const inputClasses = 'w-full bg-surface rounded-lg border border-border/40 px-3 py-2.5 text-sm text-text placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200'
     const selectClasses = `${inputClasses} appearance-none cursor-pointer`
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <h3 className="text-lg font-bold text-text flex items-center gap-2">
-                <span className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
-                    +
-                </span>
-                Add Company
-            </h3>
+            <div className="flex items-center justify-between">
+                <h3 className="text-lg font-bold text-text flex items-center gap-2">
+                    <span className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+                        {editingCompany ? '✏️' : '+'}
+                    </span>
+                    {editingCompany ? 'Edit Company' : 'Add Company'}
+                </h3>
+                {editingCompany && onCancelEdit && (
+                    <button
+                        type="button"
+                        onClick={onCancelEdit}
+                        className="text-xs text-text-muted hover:text-text underline cursor-pointer"
+                    >
+                        Cancel Edit
+                    </button>
+                )}
+            </div>
 
             {/* Company Name */}
             <div>
@@ -215,7 +253,7 @@ export default function CompanyForm({ selectedCoords, onSubmit, isSubmitting }: 
             {/* Submit */}
             <button
                 type="submit"
-                disabled={!selectedCoords || !name || isSubmitting || (subSector === 'Other...' && !customSubSector.trim())}
+                disabled={(!selectedCoords && !editingCompany) || !name || isSubmitting || (subSector === 'Other...' && !customSubSector.trim())}
                 className="w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-300 cursor-pointer
           bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary
           text-white shadow-lg shadow-primary/25 hover:shadow-primary/40

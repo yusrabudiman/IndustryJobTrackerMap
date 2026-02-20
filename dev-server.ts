@@ -60,21 +60,29 @@ function createMockRes(res: http.ServerResponse) {
 }
 
 const server = http.createServer(async (req, res) => {
-    const url = new URL(req.url || '/', `http://localhost:${PORT}`)
-    const pathname = url.pathname
-    const body = await parseBody(req)
-
-    const mockReq: any = {
-        method: req.method,
-        url: req.url,
-        headers: req.headers,
-        query: Object.fromEntries(url.searchParams),
-        body,
-    }
-
     const mockRes = createMockRes(res)
 
     try {
+        const url = new URL(req.url || '/', `http://localhost:${PORT}`)
+        const pathname = url.pathname
+        console.log(`[DEV] ${req.method} ${pathname}`)
+
+        let body;
+        try {
+            body = await parseBody(req)
+        } catch (bodyError) {
+            console.error('[DEV] Body parsing error:', bodyError)
+            return mockRes.status(400).json({ error: 'Invalid request body' })
+        }
+
+        const mockReq: any = {
+            method: req.method,
+            url: req.url,
+            headers: req.headers,
+            query: Object.fromEntries(url.searchParams),
+            body,
+        }
+
         // Route: /api/auth/register
         if (pathname === '/api/auth/register') {
             await registerHandler(mockReq, mockRes)
@@ -83,7 +91,9 @@ const server = http.createServer(async (req, res) => {
 
         // Route: /api/auth/login
         if (pathname === '/api/auth/login') {
+            console.log('[DEV] Handling login...')
             await loginHandler(mockReq, mockRes)
+            console.log('[DEV] Login handled successfully')
             return
         }
 
@@ -108,15 +118,21 @@ const server = http.createServer(async (req, res) => {
         }
 
         // 404
+        console.warn(`[DEV] 404 Not Found: ${pathname}`)
         res.writeHead(404, { 'Content-Type': 'application/json' })
         res.end(JSON.stringify({ error: 'Not found' }))
     } catch (error) {
-        console.error('Dev server error:', error)
-        res.writeHead(500, { 'Content-Type': 'application/json' })
-        res.end(JSON.stringify({ error: 'Internal server error' }))
+        console.error('[DEV] Server error:', error)
+        if (!res.writableEnded) {
+            res.writeHead(500, { 'Content-Type': 'application/json' })
+            res.end(JSON.stringify({
+                error: 'Internal server error',
+                message: error instanceof Error ? error.message : String(error)
+            }))
+        }
     }
 })
 
-server.listen(PORT, () => {
-    console.log(`\n  🚀 API dev server running at http://localhost:${PORT}\n`)
+server.listen(PORT, '127.0.0.1', () => {
+    console.log(`\n  🚀 API dev server running at http://127.0.0.1:${PORT}\n`)
 })

@@ -2,6 +2,16 @@ import type { Company, CompanyInput, AuthResponse, User } from '../types/company
 
 const API_BASE = '/api'
 
+async function safeJson(res: Response) {
+    const text = await res.text()
+    if (!text) return null
+    try {
+        return JSON.parse(text)
+    } catch (e) {
+        throw new Error(`Invalid JSON response from server: ${text.substring(0, 50)}...`)
+    }
+}
+
 function getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem('auth_token')
     const headers: HeadersInit = { 'Content-Type': 'application/json' }
@@ -18,11 +28,11 @@ export async function registerUser(name: string, email: string, password: string
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
     })
+    const data = await safeJson(res)
     if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Registration failed')
+        throw new Error(data?.error || 'Registration failed')
     }
-    return res.json()
+    return data
 }
 
 export async function loginUser(email: string, password: string): Promise<AuthResponse> {
@@ -31,19 +41,19 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
     })
+    const data = await safeJson(res)
     if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Login failed')
+        throw new Error(data?.error || 'Login failed')
     }
-    return res.json()
+    return data
 }
 
 export async function getMe(): Promise<User> {
     const res = await fetch(`${API_BASE}/auth/me`, {
         headers: getAuthHeaders(),
     })
-    if (!res.ok) throw new Error('Not authenticated')
-    const data = await res.json()
+    const data = await safeJson(res)
+    if (!res.ok) throw new Error(data?.error || 'Not authenticated')
     return data.user
 }
 
@@ -52,8 +62,9 @@ export async function getCompanies(): Promise<Company[]> {
     const res = await fetch(`${API_BASE}/companies`, {
         headers: getAuthHeaders(),
     })
-    if (!res.ok) throw new Error('Failed to fetch companies')
-    return res.json()
+    const data = await safeJson(res)
+    if (!res.ok) throw new Error(data?.error || 'Failed to fetch companies')
+    return data
 }
 
 export async function createCompany(data: CompanyInput): Promise<Company> {
@@ -62,11 +73,11 @@ export async function createCompany(data: CompanyInput): Promise<Company> {
         headers: getAuthHeaders(),
         body: JSON.stringify(data),
     })
+    const responseData = await safeJson(res)
     if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to create company')
+        throw new Error(responseData?.error || 'Failed to create company')
     }
-    return res.json()
+    return responseData
 }
 
 export async function deleteCompany(id: string): Promise<void> {
@@ -74,15 +85,23 @@ export async function deleteCompany(id: string): Promise<void> {
         method: 'DELETE',
         headers: getAuthHeaders(),
     })
-    if (!res.ok) throw new Error('Failed to delete company')
+    if (!res.ok) {
+        const data = await safeJson(res)
+        throw new Error(data?.error || 'Failed to delete company')
+    }
 }
 
 export async function toggleCompanyVisibility(id: string, isPublic: boolean): Promise<Company> {
+    return updateCompany(id, { isPublic })
+}
+
+export async function updateCompany(id: string, data: Partial<CompanyInput>): Promise<Company> {
     const res = await fetch(`${API_BASE}/companies/${id}`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
-        body: JSON.stringify({ isPublic }),
+        body: JSON.stringify(data),
     })
-    if (!res.ok) throw new Error('Failed to update visibility')
-    return res.json()
+    const responseData = await safeJson(res)
+    if (!res.ok) throw new Error(responseData?.error || 'Failed to update company')
+    return responseData
 }

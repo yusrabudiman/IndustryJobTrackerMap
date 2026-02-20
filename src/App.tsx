@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import 'leaflet/dist/leaflet.css'
 import MapView from './components/MapView'
 import Sidebar from './components/Sidebar'
 import CompanyForm from './components/CompanyForm'
@@ -9,7 +10,7 @@ import LandingPage from './components/LandingPage'
 import LocationSearch from './components/LocationSearch'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ThemeProvider, useTheme } from './context/ThemeContext'
-import { getCompanies, createCompany, deleteCompany, toggleCompanyVisibility } from './lib/api'
+import { getCompanies, createCompany, deleteCompany, updateCompany } from './lib/api'
 import type { Company, CompanyInput } from './types/company'
 import { CompanyStatus } from './types/company'
 
@@ -21,6 +22,7 @@ function Dashboard() {
     const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number } | null>(null)
     const [focusCompany, setFocusCompany] = useState<Company | null>(null)
     const [filteredStatuses, setFilteredStatuses] = useState<CompanyStatus[]>(Object.values(CompanyStatus))
+    const [editingCompany, setEditingCompany] = useState<Company | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isDeleting, setIsDeleting] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
@@ -42,12 +44,27 @@ function Dashboard() {
     async function handleSubmit(data: CompanyInput) {
         setIsSubmitting(true)
         setError(null)
+
         try {
-            await createCompany(data)
-            await loadCompanies()
+            if (editingCompany) {
+                await handleUpdateCompany(editingCompany.id, data)
+                setEditingCompany(null)
+                // Optionally show a success toast here
+            } else {
+                const originalCompanies = [...companies]
+                try {
+                    await createCompany(data)
+                    await loadCompanies()
+                } catch (err) {
+                    setCompanies(originalCompanies)
+                    setError(err instanceof Error ? err.message : 'Failed to save company')
+                    return // Stop if create failed
+                }
+            }
             setSelectedCoords(null)
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to create company')
+            // Error already handled in handleUpdateCompany, just catch to avoid unhandled rejection
+            console.error('Submit error:', err)
         } finally {
             setIsSubmitting(false)
         }
@@ -67,23 +84,49 @@ function Dashboard() {
     }
 
     async function handleToggleVisibility(id: string, isPublic: boolean) {
+        handleUpdateCompany(id, { isPublic })
+    }
+
+    async function handleUpdateCompany(id: string, data: Partial<CompanyInput>) {
+        const originalCompanies = [...companies]
+
         try {
-            await toggleCompanyVisibility(id, isPublic)
-            await loadCompanies()
+            // Send update to server and get the confirmed record back
+            const updated = await updateCompany(id, data)
+
+            // Immediately sync state with the confirmed record from DB
+            setCompanies(prev => prev.map(c => c.id === id ? updated : c))
+            if (focusCompany?.id === id) {
+                setFocusCompany(updated)
+            }
+            return updated
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to update visibility')
+            setCompanies(originalCompanies) // Rollback only on actual failure
+            const message = err instanceof Error ? err.message : 'Failed to update company'
+            setError(message)
+            throw new Error(message) // Re-throw so the caller knows it failed
         }
+    }
+
+    function startEditing(company: Company) {
+        setEditingCompany(company)
+        setSelectedCoords({ lat: company.latitude, lng: company.longitude })
+        setFocusCompany(company)
+        // Scroll to top of sidebar
+        document.querySelector('aside')?.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
     function handleMapClick(lat: number, lng: number) {
         setSelectedCoords({ lat, lng })
         setFocusCompany(null)
+        // Removed: setEditingCompany(null) - Keep the editing state if we are editing
         if (!sidebarOpen) setSidebarOpen(true)
     }
 
     function handleSelectCompany(company: Company) {
         setFocusCompany(company)
         setSelectedCoords(null)
+        setEditingCompany(null)
     }
 
     return (
@@ -94,6 +137,8 @@ function Dashboard() {
                 onMapClick={handleMapClick}
                 selectedCoords={selectedCoords}
                 focusCompany={focusCompany}
+                currentUserId={user?.id || null}
+                onEdit={startEditing}
             />
 
             <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)}>
@@ -154,6 +199,8 @@ function Dashboard() {
 
                 <CompanyForm
                     selectedCoords={selectedCoords}
+                    editingCompany={editingCompany}
+                    onCancelEdit={() => setEditingCompany(null)}
                     onSubmit={handleSubmit}
                     isSubmitting={isSubmitting}
                 />
@@ -164,6 +211,7 @@ function Dashboard() {
                     companies={companies}
                     onDelete={handleDelete}
                     onToggleVisibility={handleToggleVisibility}
+                    onUpdate={startEditing}
                     onSelect={handleSelectCompany}
                     isDeleting={isDeleting}
                     currentUserId={user?.id || null}

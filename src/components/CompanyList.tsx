@@ -6,6 +6,7 @@ interface CompanyListProps {
     companies: Company[]
     onDelete: (id: string) => void
     onToggleVisibility: (id: string, isPublic: boolean) => void
+    onUpdate: (company: Company) => void
     onSelect: (company: Company) => void
     isDeleting: string | null
     currentUserId: string | null
@@ -20,11 +21,12 @@ interface CompanyCardProps {
     isOwner: boolean
     onSelect: (c: Company) => void
     onToggleVisibility: (id: string, pub: boolean) => void
+    onUpdate: (company: Company) => void
     onDelete: (id: string) => void
     isDeleting: boolean
 }
 
-function CompanyCard({ company, isOwner, onSelect, onToggleVisibility, onDelete, isDeleting }: CompanyCardProps) {
+function CompanyCard({ company, isOwner, onSelect, onToggleVisibility, onUpdate, onDelete, isDeleting }: CompanyCardProps) {
     return (
         <div
             onClick={() => onSelect(company)}
@@ -43,6 +45,15 @@ function CompanyCard({ company, isOwner, onSelect, onToggleVisibility, onDelete,
                     </div>
                 </div>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    {isOwner && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onUpdate(company); }}
+                            className="text-xs px-2 py-1 rounded-md cursor-pointer transition-colors duration-200 hover:bg-surface-lighter/50"
+                            title="Edit Details"
+                        >
+                            ✏️
+                        </button>
+                    )}
                     {isOwner && (
                         <button
                             onClick={(e) => { e.stopPropagation(); onToggleVisibility(company.id, !company.isPublic); }}
@@ -64,6 +75,7 @@ function CompanyCard({ company, isOwner, onSelect, onToggleVisibility, onDelete,
                     )}
                 </div>
             </div>
+            {/* ... rest of the component remains the same ... */}
             <div className="flex items-center gap-2 flex-wrap">
                 <span
                     className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
@@ -97,7 +109,7 @@ function CompanyCard({ company, isOwner, onSelect, onToggleVisibility, onDelete,
     )
 }
 
-export default function CompanyList({ companies, onDelete, onToggleVisibility, onSelect, isDeleting, currentUserId }: CompanyListProps) {
+export default function CompanyList({ companies, onDelete, onToggleVisibility, onUpdate, onSelect, isDeleting, currentUserId }: CompanyListProps) {
     const [showOthers, setShowOthers] = useState(false)
 
     if (companies.length === 0) {
@@ -132,6 +144,7 @@ export default function CompanyList({ companies, onDelete, onToggleVisibility, o
                                 isOwner={true}
                                 onSelect={onSelect}
                                 onToggleVisibility={onToggleVisibility}
+                                onUpdate={onUpdate}
                                 onDelete={onDelete}
                                 isDeleting={isDeleting === c.id}
                             />
@@ -169,6 +182,7 @@ export default function CompanyList({ companies, onDelete, onToggleVisibility, o
                                     isOwner={false}
                                     onSelect={onSelect}
                                     onToggleVisibility={onToggleVisibility}
+                                    onUpdate={onUpdate}
                                     onDelete={onDelete}
                                     isDeleting={isDeleting === c.id}
                                 />

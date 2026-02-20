@@ -10,6 +10,8 @@ interface MapViewProps {
     onMapClick: (lat: number, lng: number) => void
     selectedCoords: { lat: number; lng: number } | null
     focusCompany: Company | null
+    currentUserId: string | null
+    onEdit: (company: Company) => void
 }
 
 function createColoredIcon(color: string): L.DivIcon {
@@ -109,7 +111,7 @@ function renderStars(rating: number): string {
 
 import { useTheme } from '../context/ThemeContext'
 
-export default function MapView({ companies, filteredStatuses, onMapClick, selectedCoords, focusCompany }: MapViewProps) {
+export default function MapView({ companies, filteredStatuses, onMapClick, selectedCoords, focusCompany, currentUserId, onEdit }: MapViewProps) {
     const { theme } = useTheme()
     const filtered = companies.filter((c) => filteredStatuses.includes(c.status as CompanyStatus))
 
@@ -138,7 +140,7 @@ export default function MapView({ companies, filteredStatuses, onMapClick, selec
 
             {filtered.map((company) => (
                 <Marker
-                    key={company.id}
+                    key={`${company.id}-${company.status}`}
                     position={[company.latitude, company.longitude]}
                     icon={createColoredIcon(STATUS_COLORS[company.status as CompanyStatus])}
                 >
@@ -186,6 +188,19 @@ export default function MapView({ companies, filteredStatuses, onMapClick, selec
                                 {company.notes && (
                                     <div className="mt-1 p-2 bg-surface-lighter/50 rounded-lg text-xs text-text-muted leading-relaxed border border-border/20">
                                         📝 {company.notes}
+                                    </div>
+                                )}
+                                {company.userId === currentUserId && (
+                                    <div className="mt-3 pt-2 border-t border-border/20 flex flex-col gap-2">
+                                        <button
+                                            onClick={() => onEdit(company)}
+                                            className="w-full py-1.5 px-3 bg-primary text-white text-[11px] font-bold rounded-lg hover:bg-primary-dark transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                                        >
+                                            ✏️ Edit This Tracker
+                                        </button>
+                                        <p className="text-[10px] text-text-muted text-center opacity-60">
+                                            or manually edit in sidebar
+                                        </p>
                                     </div>
                                 )}
                             </div>
