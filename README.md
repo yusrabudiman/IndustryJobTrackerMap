@@ -18,6 +18,10 @@ Track your food industry job applications on an interactive map. Visualize your 
 - 📊 **Status Tracking** — Applied, Interview, Offered, Joined, Rejected
 - ⭐ **Multi-Rating System** — Rate salary, stability, and company culture (1–5)
 - 🏷️ **Sub-Sector Tags** — FMCG, Retail F&B, Manufacturing, Startup, etc.
+- 💬 **Community Discussion** — Forum-style peer-review for each company entry
+- ↩️ **Threaded Replies** — Support for @mentions and nested conversations
+- 🕒 **Full Timestamps** — Real-time tracking with date and precise time
+- 🛡️ **Smart Admin Setup** — First-run logic automatically assigns the first registered user as Admin
 - 🔍 **Status Filters** — Toggle marker visibility by application status
 - 🌙 **Dark Mode** — Beautiful dark theme with glassmorphism UI
 - ☁️ **Cloud Native** — Vercel serverless + Prisma Accelerate + PostgreSQL
@@ -55,7 +59,8 @@ Track your food industry job applications on an interactive map. Visualize your 
 │   │   ├── MapView.tsx      # Interactive Leaflet map
 │   │   ├── Sidebar.tsx      # Collapsible sidebar panel
 │   │   ├── CompanyForm.tsx  # Add company form with visibility toggle
-│   │   ├── CompanyList.tsx  # Tracked companies with visibility badges
+│   │   ├── CompanyList.tsx  # Tracked companies with visibility badges & discussion icons
+│   │   ├── DiscussionModal.tsx # Forum-style discussion & reply system
 │   │   └── StatusFilter.tsx # Filter markers by status
 │   ├── context/
 │   │   └── AuthContext.tsx  # Global authentication state manager
@@ -115,6 +120,8 @@ The following items are excluded from the repository for security and efficiency
    # Enter any strong random string here to sign your authentication tokens
    JWT_SECRET="your-super-long-random-secret-key-here"
    ```
+
+   > **Note on Admin Setup:** The very first user to register on an empty database will automatically be granted the **ADMIN** role.
 
 3. **Generate Prisma Client and run migration:**
    ```bash
@@ -179,6 +186,19 @@ Create a new company.
 
 ### `DELETE /api/companies/[id]`
 Delete a company by ID.
+
+### `GET /api/companies/[id]/comments`
+Fetch all discussion comments for a specific company in chronological order.
+
+### `POST /api/companies/[id]/comments`
+Add a new comment or reply (@mention) to a company discussion.
+**Body:**
+```json
+{
+  "content": "@UserGreat insight, thanks!",
+  "parentId": "optional_comment_id_for_replies"
+}
+```
 
 ## Marker Colors
 

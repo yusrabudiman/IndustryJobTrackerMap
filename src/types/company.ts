@@ -6,6 +6,16 @@ export enum CompanyStatus {
     REJECTED = 'REJECTED',
 }
 
+export interface Comment {
+    id: string
+    content: string
+    createdAt: string
+    userId: string
+    user: { name: string }
+    companyId: string
+    parentId?: string | null
+}
+
 export interface Company {
     id: string
     name: string
@@ -21,6 +31,7 @@ export interface Company {
     createdAt: string
     userId: string
     user?: { name: string }
+    comments?: Comment[]
 }
 
 export type CompanyInput = Omit<Company, 'id' | 'createdAt' | 'userId' | 'user'>

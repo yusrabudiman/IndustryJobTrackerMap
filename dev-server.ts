@@ -4,6 +4,7 @@ import http from 'http'
 // Import Vercel-style handlers
 import companiesHandler from './api/companies'
 import companyByIdHandler from './api/companies/[id]'
+import commentsHandler from './api/companies/[id]/comments'
 import registerHandler from './api/auth/register'
 import loginHandler from './api/auth/login'
 import meHandler from './api/auth/me'
@@ -119,6 +120,15 @@ const server = http.createServer(async (req, res) => {
             return
         }
 
+        // Route: /api/companies/:id/comments
+        const commentsMatch = pathname.match(/^\/api\/companies\/([^/]+)\/comments\/?$/)
+        if (commentsMatch) {
+            console.log(`[DEV] Matched Comments Route for ID: ${commentsMatch[1]}`)
+            mockReq.query.id = commentsMatch[1]
+            await commentsHandler(mockReq, mockRes)
+            return
+        }
+
         // Route: /api/companies/:id
         const idMatch = pathname.match(/^\/api\/companies\/([^/]+)$/)
         if (idMatch) {
@@ -134,9 +144,9 @@ const server = http.createServer(async (req, res) => {
         }
 
         // 404
-        console.warn(`[DEV] 404 Not Found: ${pathname}`)
+        console.warn(`[DEV] !!! 404 Not Found !!! Path: "${pathname}" Method: ${req.method}`)
         res.writeHead(404, { 'Content-Type': 'application/json' })
-        res.end(JSON.stringify({ error: 'Not found' }))
+        res.end(JSON.stringify({ error: 'Not found', path: pathname }))
     } catch (error) {
         console.error('[DEV] Server error:', error)
         if (!res.writableEnded) {

@@ -38,17 +38,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 12)
 
+        // Check if this is the first user (becomes ADMIN)
+        const userCount = await prisma.user.count()
+        const role = userCount === 0 ? 'ADMIN' : 'USER'
+
         // Create user
         const user = await prisma.user.create({
-            data: { name, email, password: hashedPassword },
+            data: { name, email, password: hashedPassword, role },
         })
 
         // Generate token
-        const token = await signToken({ userId: user.id, email: user.email })
+        const token = await signToken({ userId: user.id, email: user.email, role: user.role as 'USER' | 'ADMIN' })
 
         return res.status(201).json({
             token,
-            user: { id: user.id, name: user.name, email: user.email },
+            user: { id: user.id, name: user.name, email: user.email, role: user.role },
         })
     } catch (error) {
         console.error('Register error:', error)

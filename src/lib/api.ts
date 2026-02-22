@@ -1,4 +1,4 @@
-import type { Company, CompanyInput, AuthResponse, User, AdminUser, AdminStats } from '../types/company'
+import type { Company, CompanyInput, AuthResponse, User, AdminUser, AdminStats, Comment } from '../types/company'
 
 const API_BASE = '/api'
 
@@ -104,6 +104,27 @@ export async function updateCompany(id: string, data: Partial<CompanyInput>): Pr
     const responseData = await safeJson(res)
     if (!res.ok) throw new Error(responseData?.error || 'Failed to update company')
     return responseData
+}
+
+// ─── Comments ────────────────────────────────────────────────
+export async function getComments(companyId: string): Promise<Comment[]> {
+    const res = await fetch(`${API_BASE}/companies/${companyId}/comments`, {
+        headers: getAuthHeaders(),
+    })
+    const data = await safeJson(res)
+    if (!res.ok) throw new Error(data?.error || 'Failed to fetch comments')
+    return data
+}
+
+export async function addComment(companyId: string, content: string, parentId?: string | null): Promise<Comment> {
+    const res = await fetch(`${API_BASE}/companies/${companyId}/comments`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ content, parentId }),
+    })
+    const data = await safeJson(res)
+    if (!res.ok) throw new Error(data?.error || 'Failed to add comment')
+    return data
 }
 
 // ─── Admin ───────────────────────────────────────────────────

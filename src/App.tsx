@@ -9,6 +9,7 @@ import AuthPage from './components/AuthPage'
 import LandingPage from './components/LandingPage'
 import LocationSearch from './components/LocationSearch'
 import AdminPage from './components/AdminPage'
+import DiscussionModal from './components/DiscussionModal'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ThemeProvider, useTheme } from './context/ThemeContext'
 import { getCompanies, createCompany, deleteCompany, updateCompany } from './lib/api'
@@ -28,6 +29,7 @@ function Dashboard() {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isDeleting, setIsDeleting] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
+    const [discussionCompany, setDiscussionCompany] = useState<Company | null>(null)
 
     const loadCompanies = useCallback(async () => {
         try {
@@ -146,6 +148,7 @@ function Dashboard() {
                 focusCompany={focusCompany}
                 currentUserId={user?.id || null}
                 onEdit={startEditing}
+                onOpenDiscussion={setDiscussionCompany}
             />
 
             <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)}>
@@ -231,8 +234,16 @@ function Dashboard() {
                     onSelect={handleSelectCompany}
                     isDeleting={isDeleting}
                     currentUserId={user?.id || null}
+                    onOpenDiscussion={setDiscussionCompany}
                 />
             </Sidebar>
+
+            {discussionCompany && (
+                <DiscussionModal
+                    company={discussionCompany}
+                    onClose={() => setDiscussionCompany(null)}
+                />
+            )}
         </div>
     )
 }

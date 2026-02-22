@@ -17,6 +17,7 @@ model User {
   lastLoginAt DateTime?
   createdAt   DateTime  @default(now())
   companies   Company[]
+  comments    Comment[]
 }
 
 enum Role {
@@ -39,8 +40,30 @@ model Company {
   isPublic        Boolean       @default(false)
   userId          String
   user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments        Comment[]
 
   @@index([userId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  // Relations
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  parentId String?
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  Comment[] @relation("CommentReplies")
+
+  @@index([companyId])
+  @@index([userId])
+  @@index([parentId])
 }
 
 enum CompanyStatus {

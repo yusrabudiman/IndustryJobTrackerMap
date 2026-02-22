@@ -10,6 +10,7 @@ interface CompanyListProps {
     onSelect: (company: Company) => void
     isDeleting: string | null
     currentUserId: string | null
+    onOpenDiscussion: (company: Company) => void
 }
 
 function getAverageRating(c: Company): string {
@@ -24,9 +25,10 @@ interface CompanyCardProps {
     onUpdate: (company: Company) => void
     onDelete: (id: string) => void
     isDeleting: boolean
+    onOpenDiscussion: (company: Company) => void
 }
 
-function CompanyCard({ company, isOwner, onSelect, onToggleVisibility, onUpdate, onDelete, isDeleting }: CompanyCardProps) {
+function CompanyCard({ company, isOwner, onSelect, onToggleVisibility, onUpdate, onDelete, isDeleting, onOpenDiscussion }: CompanyCardProps) {
     return (
         <div
             onClick={() => onSelect(company)}
@@ -45,15 +47,13 @@ function CompanyCard({ company, isOwner, onSelect, onToggleVisibility, onUpdate,
                     </div>
                 </div>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    {isOwner && (
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onUpdate(company); }}
-                            className="text-xs px-2 py-1 rounded-md cursor-pointer transition-colors duration-200 hover:bg-surface-lighter/50"
-                            title="Edit Details"
-                        >
-                            ✏️
-                        </button>
-                    )}
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onOpenDiscussion(company); }}
+                        className="text-xs px-2 py-1 rounded-md cursor-pointer transition-colors duration-200 hover:bg-primary/20 hover:text-primary"
+                        title="Discussion"
+                    >
+                        💬
+                    </button>
                     {isOwner && (
                         <button
                             onClick={(e) => { e.stopPropagation(); onToggleVisibility(company.id, !company.isPublic); }}
@@ -109,7 +109,7 @@ function CompanyCard({ company, isOwner, onSelect, onToggleVisibility, onUpdate,
     )
 }
 
-export default function CompanyList({ companies, onDelete, onToggleVisibility, onUpdate, onSelect, isDeleting, currentUserId }: CompanyListProps) {
+export default function CompanyList({ companies, onDelete, onToggleVisibility, onUpdate, onSelect, isDeleting, currentUserId, onOpenDiscussion }: CompanyListProps) {
     const [showOthers, setShowOthers] = useState(false)
 
     if (companies.length === 0) {
@@ -147,6 +147,7 @@ export default function CompanyList({ companies, onDelete, onToggleVisibility, o
                                 onUpdate={onUpdate}
                                 onDelete={onDelete}
                                 isDeleting={isDeleting === c.id}
+                                onOpenDiscussion={onOpenDiscussion}
                             />
                         ))
                     ) : (
@@ -185,6 +186,7 @@ export default function CompanyList({ companies, onDelete, onToggleVisibility, o
                                     onUpdate={onUpdate}
                                     onDelete={onDelete}
                                     isDeleting={isDeleting === c.id}
+                                    onOpenDiscussion={onOpenDiscussion}
                                 />
                             ))}
                         </div>

@@ -12,6 +12,7 @@ interface MapViewProps {
     focusCompany: Company | null
     currentUserId: string | null
     onEdit: (company: Company) => void
+    onOpenDiscussion: (company: Company) => void
 }
 
 function createColoredIcon(color: string): L.DivIcon {
@@ -111,7 +112,7 @@ function renderStars(rating: number): string {
 
 import { useTheme } from '../context/ThemeContext'
 
-export default function MapView({ companies, filteredStatuses, onMapClick, selectedCoords, focusCompany, currentUserId, onEdit }: MapViewProps) {
+export default function MapView({ companies, filteredStatuses, onMapClick, selectedCoords, focusCompany, currentUserId, onEdit, onOpenDiscussion }: MapViewProps) {
     const { theme } = useTheme()
     const filtered = companies.filter((c) => filteredStatuses.includes(c.status as CompanyStatus))
 
@@ -186,10 +187,23 @@ export default function MapView({ companies, filteredStatuses, onMapClick, selec
                                     </span>
                                 </div>
                                 {company.notes && (
-                                    <div className="mt-1 p-2 bg-surface-lighter/50 rounded-lg text-xs text-text-muted leading-relaxed border border-border/20">
-                                        📝 {company.notes}
+                                    <div
+                                        onClick={() => onOpenDiscussion(company)}
+                                        className="mt-1 p-2 bg-primary/5 hover:bg-primary/10 rounded-lg text-xs text-text-muted leading-relaxed border border-primary/10 hover:border-primary/30 transition-all cursor-pointer group"
+                                    >
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="font-bold text-[10px] text-primary uppercase">Industry Discussion</span>
+                                            <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-primary">View →</span>
+                                        </div>
+                                        <p className="line-clamp-2 italic">📝 {company.notes}</p>
                                     </div>
                                 )}
+                                <button
+                                    onClick={() => onOpenDiscussion(company)}
+                                    className="w-full mt-2 py-1.5 px-3 bg-surface-lighter hover:bg-surface-light text-text text-[11px] font-bold rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2 border border-border/30"
+                                >
+                                    💬 Join Community Discussion
+                                </button>
                                 {company.userId === currentUserId && (
                                     <div className="mt-3 pt-2 border-t border-border/20 flex flex-col gap-2">
                                         <button
