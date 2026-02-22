@@ -29,6 +29,26 @@ export interface User {
     id: string
     name: string
     email: string
+    role: 'USER' | 'ADMIN'
+}
+
+export interface AdminUser {
+    id: string
+    name: string
+    email: string
+    role: 'USER' | 'ADMIN'
+    isActive: boolean
+    lastLoginAt: string | null
+    createdAt: string
+    _count: { companies: number }
+}
+
+export interface AdminStats {
+    totalUsers: number
+    activeUsers: number
+    inactiveUsers: number
+    adminUsers: number
+    neverLoggedIn: number
 }
 
 export interface AuthResponse {

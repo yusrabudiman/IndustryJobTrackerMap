@@ -8,6 +8,7 @@ import StatusFilter from './components/StatusFilter'
 import AuthPage from './components/AuthPage'
 import LandingPage from './components/LandingPage'
 import LocationSearch from './components/LocationSearch'
+import AdminPage from './components/AdminPage'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ThemeProvider, useTheme } from './context/ThemeContext'
 import { getCompanies, createCompany, deleteCompany, updateCompany } from './lib/api'
@@ -17,6 +18,7 @@ import { CompanyStatus } from './types/company'
 function Dashboard() {
     const { user, logout } = useAuth()
     const { theme, toggleTheme } = useTheme()
+    const [showAdmin, setShowAdmin] = useState(false)
     const [companies, setCompanies] = useState<Company[]>([])
     const [sidebarOpen, setSidebarOpen] = useState(true)
     const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number } | null>(null)
@@ -129,6 +131,11 @@ function Dashboard() {
         setEditingCompany(null)
     }
 
+    // Show Admin Page if active
+    if (showAdmin) {
+        return <AdminPage onBack={() => setShowAdmin(false)} />
+    }
+
     return (
         <div className="relative w-full h-full">
             <MapView
@@ -153,6 +160,15 @@ function Dashboard() {
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
+                        {user?.role === 'ADMIN' && (
+                            <button
+                                onClick={() => setShowAdmin(true)}
+                                className="p-2 rounded-lg hover:bg-surface-lighter transition-colors cursor-pointer text-amber-400"
+                                title="Admin Panel"
+                            >
+                                👑
+                            </button>
+                        )}
                         <button
                             onClick={toggleTheme}
                             className="p-2 rounded-lg hover:bg-surface-lighter transition-colors cursor-pointer"

@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
   output   = "../generated/prisma"
 }
 
@@ -8,12 +8,20 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  email     String    @unique
-  name      String
-  password  String
-  createdAt DateTime  @default(now())
-  companies Company[]
+  id          String    @id @default(cuid())
+  email       String    @unique
+  name        String
+  password    String
+  role        Role      @default(USER)
+  isActive    Boolean   @default(true)
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  companies   Company[]
+}
+
+enum Role {
+  USER
+  ADMIN
 }
 
 model Company {

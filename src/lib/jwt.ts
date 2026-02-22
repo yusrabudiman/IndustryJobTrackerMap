@@ -9,6 +9,7 @@ const JWT_SECRET = new TextEncoder().encode(secret)
 export interface JWTPayload {
     userId: string
     email: string
+    role: 'USER' | 'ADMIN'
 }
 
 export async function signToken(payload: JWTPayload): Promise<string> {
@@ -25,6 +26,7 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
         return {
             userId: payload.userId as string,
             email: payload.email as string,
+            role: (payload.role as 'USER' | 'ADMIN') ?? 'USER',
         }
     } catch {
         return null

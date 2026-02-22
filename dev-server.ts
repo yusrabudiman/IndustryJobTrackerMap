@@ -7,6 +7,8 @@ import companyByIdHandler from './api/companies/[id]'
 import registerHandler from './api/auth/register'
 import loginHandler from './api/auth/login'
 import meHandler from './api/auth/me'
+import adminUsersHandler from './api/admin/users/index'
+import adminUserByIdHandler from './api/admin/users/[id]'
 
 const PORT = 3001
 
@@ -100,6 +102,20 @@ const server = http.createServer(async (req, res) => {
         // Route: /api/auth/me
         if (pathname === '/api/auth/me') {
             await meHandler(mockReq, mockRes)
+            return
+        }
+
+        // Route: /api/admin/users/:id
+        const adminUserIdMatch = pathname.match(/^\/api\/admin\/users\/([^/]+)$/)
+        if (adminUserIdMatch) {
+            mockReq.query.id = adminUserIdMatch[1]
+            await adminUserByIdHandler(mockReq, mockRes)
+            return
+        }
+
+        // Route: /api/admin/users
+        if (pathname === '/api/admin/users') {
+            await adminUsersHandler(mockReq, mockRes)
             return
         }
 

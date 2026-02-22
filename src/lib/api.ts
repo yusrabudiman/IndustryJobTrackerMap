@@ -1,4 +1,4 @@
-import type { Company, CompanyInput, AuthResponse, User } from '../types/company'
+import type { Company, CompanyInput, AuthResponse, User, AdminUser, AdminStats } from '../types/company'
 
 const API_BASE = '/api'
 
@@ -104,4 +104,39 @@ export async function updateCompany(id: string, data: Partial<CompanyInput>): Pr
     const responseData = await safeJson(res)
     if (!res.ok) throw new Error(responseData?.error || 'Failed to update company')
     return responseData
+}
+
+// ─── Admin ───────────────────────────────────────────────────
+export async function getAdminUsers(): Promise<{ users: AdminUser[]; stats: AdminStats }> {
+    const res = await fetch(`${API_BASE}/admin/users`, {
+        headers: getAuthHeaders(),
+    })
+    const data = await safeJson(res)
+    if (!res.ok) throw new Error(data?.error || 'Failed to fetch users')
+    return data
+}
+
+export async function updateAdminUser(
+    id: string,
+    data: { name?: string; email?: string; role?: 'USER' | 'ADMIN'; isActive?: boolean; newPassword?: string }
+): Promise<AdminUser> {
+    const res = await fetch(`${API_BASE}/admin/users/${id}`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+    })
+    const responseData = await safeJson(res)
+    if (!res.ok) throw new Error(responseData?.error || 'Failed to update user')
+    return responseData
+}
+
+export async function deleteAdminUser(id: string): Promise<void> {
+    const res = await fetch(`${API_BASE}/admin/users/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+    })
+    if (!res.ok) {
+        const data = await safeJson(res)
+        throw new Error(data?.error || 'Failed to delete user')
+    }
 }

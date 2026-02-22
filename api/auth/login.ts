@@ -34,18 +34,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return res.status(401).json({ error: 'Invalid email or password' })
         }
 
+        // Check if account is active
+        if (!user.isActive) {
+            return res.status(403).json({ error: 'Your account has been deactivated. Please contact admin.' })
+        }
+
         // Verify password
         const isValid = await bcrypt.compare(password, user.password)
         if (!isValid) {
             return res.status(401).json({ error: 'Invalid email or password' })
         }
 
-        // Generate token
-        const token = await signToken({ userId: user.id, email: user.email })
+        // Update last login
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { lastLoginAt: new Date() },
+        })
+
+        // Generate token with role
+        const token = await signToken({ userId: user.id, email: user.email, role: user.role })
 
         return res.status(200).json({
             token,
-            user: { id: user.id, name: user.name, email: user.email },
+            user: { id: user.id, name: user.name, email: user.email, role: user.role },
         })
     } catch (error) {
         console.error('Login error:', error)
