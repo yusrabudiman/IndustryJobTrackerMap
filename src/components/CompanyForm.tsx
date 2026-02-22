@@ -1,4 +1,5 @@
 import { useState, useEffect, type FormEvent } from 'react'
+import { Star, Edit3, Plus, MapPin, Banknote, Building2, Users2, Globe, Lock, Loader2 } from 'lucide-react'
 import type { CompanyInput, Company } from '../types/company'
 import { CompanyStatus, SUB_SECTORS, STATUS_LABELS } from '../types/company'
 
@@ -10,20 +11,22 @@ interface CompanyFormProps {
     isSubmitting: boolean
 }
 
-function StarRating({ value, onChange, label }: { value: number; onChange: (v: number) => void; label: string }) {
+function StarRating({ value, onChange, label, icon: Icon }: { value: number; onChange: (v: number) => void; label: string; icon: any }) {
     return (
         <div>
-            <label className="block text-sm font-medium text-text-muted mb-1.5">{label}</label>
+            <div className="flex items-center gap-2 mb-1.5">
+                <Icon className="w-4 h-4 text-text-muted" />
+                <label className="block text-sm font-medium text-text-muted">{label}</label>
+            </div>
             <div className="flex gap-1.5">
                 {[1, 2, 3, 4, 5].map((star) => (
                     <button
                         key={star}
                         type="button"
                         onClick={() => onChange(star)}
-                        className={`text-2xl transition-all duration-200 hover:scale-125 cursor-pointer ${star <= value ? 'star-active' : 'star-inactive'
-                            }`}
+                        className={`transition-all duration-200 hover:scale-125 cursor-pointer ${star <= value ? 'text-warning fill-warning' : 'text-text-muted/20'}`}
                     >
-                        ★
+                        <Star className={`w-6 h-6 ${star <= value ? 'fill-warning' : ''}`} />
                     </button>
                 ))}
             </div>
@@ -104,7 +107,7 @@ export default function CompanyForm({ selectedCoords, editingCompany, onCancelEd
             <div className="flex items-center justify-between">
                 <h3 className="text-lg font-bold text-text flex items-center gap-2">
                     <span className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
-                        {editingCompany ? '✏️' : '+'}
+                        {editingCompany ? <Edit3 className="w-4 h-4" /> : <Plus className="w-5 h-5" />}
                     </span>
                     {editingCompany ? 'Edit Company' : 'Add Company'}
                 </h3>
@@ -189,7 +192,7 @@ export default function CompanyForm({ selectedCoords, editingCompany, onCancelEd
             </div>
             {!selectedCoords && (
                 <p className="text-xs text-warning/80 -mt-2 flex items-center gap-1">
-                    <span>📍</span> Click on the map to set coordinates
+                    <MapPin className="w-3 h-3" /> Click on the map to set coordinates
                 </p>
             )}
 
@@ -209,10 +212,10 @@ export default function CompanyForm({ selectedCoords, editingCompany, onCancelEd
 
             {/* Ratings */}
             <div className="space-y-3 p-3 rounded-lg bg-surface/60 border border-border/30">
-                <p className="text-sm font-semibold text-text-muted uppercase tracking-wider">Ratings</p>
-                <StarRating value={ratingSalary} onChange={setRatingSalary} label="💰 Salary" />
-                <StarRating value={ratingStability} onChange={setRatingStability} label="🏢 Stability" />
-                <StarRating value={ratingCulture} onChange={setRatingCulture} label="🤝 Culture" />
+                <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Ratings</p>
+                <StarRating value={ratingSalary} onChange={setRatingSalary} label="Salary" icon={Banknote} />
+                <StarRating value={ratingStability} onChange={setRatingStability} label="Stability" icon={Building2} />
+                <StarRating value={ratingCulture} onChange={setRatingCulture} label="Culture" icon={Users2} />
             </div>
 
             {/* Notes */}
@@ -231,9 +234,19 @@ export default function CompanyForm({ selectedCoords, editingCompany, onCancelEd
             <div className="flex items-center justify-between p-3 rounded-lg bg-surface/60 border border-border/30">
                 <div>
                     <p className="text-sm font-medium text-text">Visibility</p>
-                    <p className="text-xs text-text-muted mt-0.5">
-                        {isPublic ? '🌍 Visible to everyone' : '🔒 Only visible to you'}
-                    </p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                        {isPublic ? (
+                            <>
+                                <Globe className="w-3 h-3 text-text-muted" />
+                                <span className="text-xs text-text-muted">Visible to everyone</span>
+                            </>
+                        ) : (
+                            <>
+                                <Lock className="w-3 h-3 text-text-muted" />
+                                <span className="text-xs text-text-muted">Only visible to you</span>
+                            </>
+                        )}
+                    </div>
                 </div>
                 <button
                     type="button"
@@ -262,13 +275,15 @@ export default function CompanyForm({ selectedCoords, editingCompany, onCancelEd
             >
                 {isSubmitting ? (
                     <span className="flex items-center justify-center gap-2">
-                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
+                        <Loader2 className="w-4 h-4 animate-spin" />
                         Saving...
                     </span>
-                ) : '📌 Save Company'}
+                ) : (
+                    <div className="flex items-center justify-center gap-2">
+                        <MapPin className="w-4 h-4" />
+                        <span>Save Company</span>
+                    </div>
+                )}
             </button>
         </form>
     )

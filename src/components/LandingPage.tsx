@@ -1,4 +1,17 @@
 import { useState, useEffect } from 'react'
+import {
+    MapPin,
+    LayoutDashboard,
+    ShieldCheck,
+    Users,
+    Activity,
+    Cloud,
+    ArrowRight,
+    PlayCircle,
+    Lock,
+    BarChart3,
+    CheckCircle2
+} from 'lucide-react'
 
 interface LandingPageProps {
     onGetStarted: () => void
@@ -15,7 +28,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         const handleScroll = () => {
             setScrollY(container.scrollTop)
 
-            const sections = ['hero', 'features', 'how-it-works', 'stats', 'cta']
+            const sections = ['hero', 'features', 'how-it-works', 'stats', 'stats', 'cta']
             const newVisible = new Set<string>()
             sections.forEach((id) => {
                 const el = document.getElementById(id)
@@ -40,6 +53,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
     return (
         <div className="landing-page" id="landing-scroll">
             {/* Animated Background */}
+            {/* ... (background code remains the same) */}
             <div className="landing-bg">
                 <div className="landing-bg-grid" />
                 <div
@@ -61,16 +75,9 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                 <div className="landing-nav-inner">
                     <div className="landing-nav-brand">
                         <div className="landing-nav-logo">
-                            <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
-                                <rect width="40" height="40" rx="10" fill="url(#nav-logo-grad)" />
-                                <path d="M12 20L17 25L28 14" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                                <defs>
-                                    <linearGradient id="nav-logo-grad" x1="0" y1="0" x2="40" y2="40">
-                                        <stop stopColor="#6366f1" />
-                                        <stop offset="1" stopColor="#8b5cf6" />
-                                    </linearGradient>
-                                </defs>
-                            </svg>
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                                <CheckCircle2 className="w-5 h-5 text-white" />
+                            </div>
                         </div>
                         <span className="landing-nav-title">JobTracker</span>
                     </div>
@@ -102,20 +109,16 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                     <div className="landing-hero-btns">
                         <button onClick={onGetStarted} className="landing-hero-primary-btn">
                             <span>Start Tracking Free</span>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M5 12h14M12 5l7 7-7 7" />
-                            </svg>
+                            <ArrowRight className="w-5 h-5" />
                         </button>
                         <a href="#features" className="landing-hero-secondary-btn">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="12" cy="12" r="10" />
-                                <polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none" />
-                            </svg>
+                            <PlayCircle className="w-4 h-4" />
                             <span>See How It Works</span>
                         </a>
                     </div>
 
                     {/* Hero Map Preview */}
+                    {/* ... (preview code remains the same) */}
                     <div className="landing-hero-preview">
                         <div className="landing-hero-preview-glow" />
                         <div className="landing-hero-preview-card">
@@ -203,67 +206,37 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                     <div className="landing-features-grid">
                         {[
                             {
-                                icon: (
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                                        <circle cx="12" cy="10" r="3" />
-                                    </svg>
-                                ),
+                                icon: <MapPin className="w-6 h-6" />,
                                 title: 'Interactive Map',
                                 desc: 'Visualize every application on an immersive map. Click to add, hover to explore, filter by status.',
                                 color: '#6366f1',
                             },
                             {
-                                icon: (
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                                        <line x1="3" y1="9" x2="21" y2="9" />
-                                        <line x1="9" y1="21" x2="9" y2="9" />
-                                    </svg>
-                                ),
+                                icon: <LayoutDashboard className="w-6 h-6" />,
                                 title: 'Smart Dashboard',
                                 desc: 'Track ratings on salary, stability, and culture. Get instant insights on your best opportunities.',
                                 color: '#8b5cf6',
                             },
                             {
-                                icon: (
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                                    </svg>
-                                ),
+                                icon: <ShieldCheck className="w-6 h-6" />,
                                 title: 'Public & Private',
                                 desc: 'Control who sees your data. Keep your journey private or share publicly to help others.',
                                 color: '#22c55e',
                             },
                             {
-                                icon: (
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                                        <circle cx="9" cy="7" r="4" />
-                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                                    </svg>
-                                ),
+                                icon: <Users className="w-6 h-6" />,
                                 title: 'Multi-User',
                                 desc: 'Personal accounts with secure authentication. See public entries from other food industry seekers.',
                                 color: '#eab308',
                             },
                             {
-                                icon: (
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                                    </svg>
-                                ),
+                                icon: <Activity className="w-6 h-6" />,
                                 title: 'Status Tracking',
                                 desc: 'From Applied → Interview → Offered → Joined. See your entire pipeline at a glance with color-coded markers.',
                                 color: '#f43f5e',
                             },
                             {
-                                icon: (
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                        <polyline points="22 4 12 14.01 9 11.01" />
-                                    </svg>
-                                ),
+                                icon: <Cloud className="w-6 h-6" />,
                                 title: 'Cloud Powered',
                                 desc: 'Built on Prisma & PostgreSQL for blazing-fast performance. Your data syncs across all your devices.',
                                 color: '#06b6d4',
@@ -302,27 +275,31 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                                 step: '01',
                                 title: 'Create Account',
                                 desc: 'Sign up in seconds with your email. No credit card required.',
-                                emoji: '🔐',
+                                icon: <Lock className="w-6 h-6" />,
+                                color: '#6366f1',
                             },
                             {
                                 step: '02',
                                 title: 'Pin on Map',
                                 desc: 'Click the map to set a location, then fill in the company details and ratings.',
-                                emoji: '📍',
+                                icon: <MapPin className="w-6 h-6" />,
+                                color: '#8b5cf6',
                             },
                             {
                                 step: '03',
                                 title: 'Track & Compare',
                                 desc: 'Filter by status, compare ratings, and make better career decisions.',
-                                emoji: '📊',
+                                icon: <BarChart3 className="w-6 h-6" />,
+                                color: '#22c55e',
                             },
                         ].map((item, i) => (
                             <div key={i} className="landing-step-card" style={{ animationDelay: `${i * 0.15}s` }}>
                                 <div className="landing-step-number">{item.step}</div>
-                                <div className="landing-step-emoji">{item.emoji}</div>
+                                <div className="landing-step-icon" style={{ color: item.color, background: `${item.color}15`, borderColor: `${item.color}30` }}>
+                                    {item.icon}
+                                </div>
                                 <h3 className="landing-step-title">{item.title}</h3>
                                 <p className="landing-step-desc">{item.desc}</p>
-                                {i < 2 && <div className="landing-step-connector" />}
                             </div>
                         ))}
                     </div>
@@ -361,9 +338,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                         </p>
                         <button onClick={onGetStarted} className="landing-cta-btn">
                             <span>Get Started — It's Free</span>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M5 12h14M12 5l7 7-7 7" />
-                            </svg>
+                            <ArrowRight className="w-5 h-5" />
                         </button>
                     </div>
                 </div>
@@ -373,16 +348,9 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             <footer className="landing-footer">
                 <div className="landing-footer-inner">
                     <div className="landing-footer-brand">
-                        <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
-                            <rect width="40" height="40" rx="10" fill="url(#footer-logo-grad)" />
-                            <path d="M12 20L17 25L28 14" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                            <defs>
-                                <linearGradient id="footer-logo-grad" x1="0" y1="0" x2="40" y2="40">
-                                    <stop stopColor="#6366f1" />
-                                    <stop offset="1" stopColor="#8b5cf6" />
-                                </linearGradient>
-                            </defs>
-                        </svg>
+                        <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mr-2 shadow-md">
+                            <CheckCircle2 className="w-4 h-4 text-white" />
+                        </div>
                         <span>Food Industry Job Tracker</span>
                     </div>
                     <p className="landing-footer-copy">© 2026 JobTracker. Built with ❤️ for food industry professionals.</p>

@@ -1,5 +1,20 @@
 import '../admin.css'
 import { useState, useEffect, useCallback } from 'react'
+import {
+    ArrowLeft,
+    Crown,
+    RefreshCw,
+    Users,
+    Circle,
+    AlertTriangle,
+    Search,
+    Lock,
+    Ban,
+    Check,
+    Trash2,
+    Key,
+    User
+} from 'lucide-react'
 import { getAdminUsers, updateAdminUser, deleteAdminUser } from '../lib/api'
 import type { AdminUser, AdminStats } from '../types/company'
 import { useAuth } from '../context/AuthContext'
@@ -155,7 +170,7 @@ export default function AdminPage({ onBack }: AdminPageProps) {
             {/* Toast notification */}
             {toast && (
                 <div className={`admin-toast admin-toast-${toast.type}`}>
-                    <span>{toast.type === 'success' ? '✅' : '❌'}</span>
+                    {toast.type === 'success' ? <Check className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
                     <span>{toast.msg}</span>
                 </div>
             )}
@@ -164,22 +179,20 @@ export default function AdminPage({ onBack }: AdminPageProps) {
             <div className="admin-header">
                 <div className="admin-header-left">
                     <button onClick={onBack} className="admin-back-btn">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M19 12H5M12 19l-7-7 7-7" />
-                        </svg>
+                        <ArrowLeft className="w-4.5 h-4.5" />
                         Back to Dashboard
                     </button>
                     <div className="admin-title-group">
-                        <div className="admin-badge">👑 Admin Panel</div>
+                        <div className="admin-badge">
+                            <Crown className="w-3.5 h-3.5" />
+                            <span>Admin Panel</span>
+                        </div>
                         <h1 className="admin-page-title">User Management</h1>
                         <p className="admin-subtitle">Manage accounts, reset passwords, and control access</p>
                     </div>
                 </div>
                 <button onClick={fetchUsers} className="admin-refresh-btn" disabled={isLoading}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                        style={{ animation: isLoading ? 'spin 0.8s linear infinite' : 'none' }}>
-                        <path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16" />
-                    </svg>
+                    <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
                     Refresh
                 </button>
             </div>
@@ -188,35 +201,45 @@ export default function AdminPage({ onBack }: AdminPageProps) {
             {stats && (
                 <div className="admin-stats-grid">
                     <div className="admin-stat-card admin-stat-total">
-                        <div className="admin-stat-icon">👥</div>
+                        <div className="admin-stat-icon">
+                            <Users className="w-6 h-6" />
+                        </div>
                         <div className="admin-stat-info">
                             <span className="admin-stat-value">{stats.totalUsers}</span>
                             <span className="admin-stat-label">Total Users</span>
                         </div>
                     </div>
                     <div className="admin-stat-card admin-stat-active">
-                        <div className="admin-stat-icon">🟢</div>
+                        <div className="admin-stat-icon">
+                            <Circle className="w-6 h-6 fill-success/20 text-success" />
+                        </div>
                         <div className="admin-stat-info">
                             <span className="admin-stat-value">{stats.activeUsers}</span>
                             <span className="admin-stat-label">Active</span>
                         </div>
                     </div>
                     <div className="admin-stat-card admin-stat-inactive">
-                        <div className="admin-stat-icon">🔴</div>
+                        <div className="admin-stat-icon">
+                            <Circle className="w-6 h-6 fill-danger/20 text-danger" />
+                        </div>
                         <div className="admin-stat-info">
                             <span className="admin-stat-value">{stats.inactiveUsers}</span>
                             <span className="admin-stat-label">Deactivated</span>
                         </div>
                     </div>
                     <div className="admin-stat-card admin-stat-never">
-                        <div className="admin-stat-icon">⚠️</div>
+                        <div className="admin-stat-icon">
+                            <AlertTriangle className="w-6 h-6 text-warning" />
+                        </div>
                         <div className="admin-stat-info">
                             <span className="admin-stat-value">{stats.neverLoggedIn}</span>
                             <span className="admin-stat-label">Never Logged In</span>
                         </div>
                     </div>
                     <div className="admin-stat-card admin-stat-admin">
-                        <div className="admin-stat-icon">👑</div>
+                        <div className="admin-stat-icon">
+                            <Crown className="w-6 h-6 text-amber-500" />
+                        </div>
                         <div className="admin-stat-info">
                             <span className="admin-stat-value">{stats.adminUsers}</span>
                             <span className="admin-stat-label">Admins</span>
@@ -228,9 +251,7 @@ export default function AdminPage({ onBack }: AdminPageProps) {
             {/* Filters */}
             <div className="admin-filters">
                 <div className="admin-search-wrapper">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
-                    </svg>
+                    <Search className="w-4 h-4" />
                     <input
                         type="text"
                         placeholder="Search by name or email..."
@@ -246,7 +267,12 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                             className={`admin-filter-pill ${filterRole === r ? 'active' : ''}`}
                             onClick={() => setFilterRole(r)}
                         >
-                            {r === 'ALL' ? 'All Roles' : r === 'ADMIN' ? '👑 Admin' : '👤 User'}
+                            {r === 'ALL' ? 'All Roles' : (
+                                <div className="flex items-center gap-1.5">
+                                    {r === 'ADMIN' ? <Crown className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
+                                    <span>{r === 'ADMIN' ? 'Admin' : 'User'}</span>
+                                </div>
+                            )}
                         </button>
                     ))}
                     <div className="admin-filter-divider" />
@@ -256,7 +282,12 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                             className={`admin-filter-pill ${filterStatus === s ? 'active' : ''}`}
                             onClick={() => setFilterStatus(s)}
                         >
-                            {s === 'ALL' ? 'All Status' : s === 'ACTIVE' ? '🟢 Active' : '🔴 Inactive'}
+                            {s === 'ALL' ? 'All Status' : (
+                                <div className="flex items-center gap-1.5">
+                                    <span className={`admin-status-dot-lite ${s === 'ACTIVE' ? 'active' : 'inactive'}`} />
+                                    <span>{s === 'ACTIVE' ? 'Active' : 'Inactive'}</span>
+                                </div>
+                            )}
                         </button>
                     ))}
                 </div>
@@ -266,17 +297,19 @@ export default function AdminPage({ onBack }: AdminPageProps) {
             <div className="admin-table-container">
                 {isLoading ? (
                     <div className="admin-loading">
-                        <div className="admin-spinner-large" />
-                        <span>Loading users...</span>
+                        <RefreshCw className="w-10 h-10 text-primary animate-spin" />
+                        <span className="font-medium">Loading users...</span>
                     </div>
                 ) : error ? (
                     <div className="admin-error-state">
-                        <span>⚠️ {error}</span>
+                        <AlertTriangle className="w-8 h-8 text-danger mb-2" />
+                        <span className="font-bold">{error}</span>
                         <button onClick={fetchUsers} className="admin-retry-btn">Retry</button>
                     </div>
                 ) : filteredUsers.length === 0 ? (
                     <div className="admin-empty-state">
-                        <span>🔍 No users found</span>
+                        <Search className="w-8 h-8 text-text-muted mb-2 opacity-20" />
+                        <span className="font-medium text-text-muted/60">No users found matching your filters</span>
                     </div>
                 ) : (
                     <table className="admin-table">
@@ -320,13 +353,24 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                                                 disabled={actionLoading || isMe}
                                                 title={isMe ? "Cannot change your own role" : `Click to toggle role`}
                                             >
-                                                {u.role === 'ADMIN' ? '👑 Admin' : '👤 User'}
+                                                {u.role === 'ADMIN' ? (
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Crown className="w-3.5 h-3.5" />
+                                                        <span>Admin</span>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-1.5">
+                                                        <User className="w-3.5 h-3.5" />
+                                                        <span>User</span>
+                                                    </div>
+                                                )}
                                             </button>
                                         </td>
                                         <td>
-                                            <span className={`admin-status-badge ${u.isActive ? 'admin-status-active' : 'admin-status-inactive'}`}>
-                                                {u.isActive ? '● Active' : '● Inactive'}
-                                            </span>
+                                            <div className={`admin-status-badge-new ${u.isActive ? 'is-active' : 'is-inactive'}`}>
+                                                <span className="admin-status-dot" />
+                                                <span>{u.isActive ? 'Active' : 'Inactive'}</span>
+                                            </div>
                                         </td>
                                         <td>
                                             <span className="admin-companies-count">{u._count.companies}</span>
@@ -338,7 +382,12 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                                         </td>
                                         <td>
                                             <span className={`admin-inactive-days ${isDormant ? 'admin-days-warning' : ''}`}>
-                                                {isDormant ? `⚠️ ${inactiveDays}d` : `${inactiveDays}d`}
+                                                {isDormant ? (
+                                                    <div className="flex items-center gap-1">
+                                                        <AlertTriangle className="w-3.5 h-3.5" />
+                                                        <span>{inactiveDays}d</span>
+                                                    </div>
+                                                ) : `${inactiveDays}d`}
                                             </span>
                                         </td>
                                         <td>
@@ -349,10 +398,7 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                                                     title="Reset Password"
                                                     onClick={() => { setSelectedUser(u); setModal('resetPassword') }}
                                                 >
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                                                    </svg>
+                                                    <Key className="w-3.5 h-3.5" />
                                                 </button>
                                                 {/* Toggle Active */}
                                                 <button
@@ -362,13 +408,9 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                                                     disabled={actionLoading || isMe}
                                                 >
                                                     {u.isActive ? (
-                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                            <circle cx="12" cy="12" r="10" /><line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
-                                                        </svg>
+                                                        <Ban className="w-3.5 h-3.5" />
                                                     ) : (
-                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                            <polyline points="20 6 9 17 4 12" />
-                                                        </svg>
+                                                        <Check className="w-3.5 h-3.5" />
                                                     )}
                                                 </button>
                                                 {/* Delete */}
@@ -379,10 +421,7 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                                                         onClick={() => { setSelectedUser(u); setModal('confirmDelete') }}
                                                         disabled={actionLoading}
                                                     >
-                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                            <polyline points="3 6 5 6 21 6" />
-                                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-                                                        </svg>
+                                                        <Trash2 className="w-3.5 h-3.5" />
                                                     </button>
                                                 )}
                                             </div>
@@ -400,7 +439,9 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                 <div className="admin-modal-overlay" onClick={() => { setModal('none'); setNewPassword('') }}>
                     <div className="admin-modal" onClick={e => e.stopPropagation()}>
                         <div className="admin-modal-header">
-                            <div className="admin-modal-icon admin-modal-icon-password">🔑</div>
+                            <div className="admin-modal-icon admin-modal-icon-password">
+                                <Key className="w-8 h-8 text-primary" />
+                            </div>
                             <h2 className="admin-modal-title">Reset Password</h2>
                             <p className="admin-modal-subtitle">Set new password for <strong>{selectedUser.name}</strong></p>
                         </div>
@@ -423,7 +464,7 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                                 onClick={handleResetPassword}
                                 disabled={actionLoading || newPassword.length < 6}
                             >
-                                {actionLoading ? '...' : 'Reset Password'}
+                                {actionLoading ? 'Loading...' : 'Reset Password'}
                             </button>
                         </div>
                     </div>
@@ -435,7 +476,9 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                 <div className="admin-modal-overlay" onClick={() => setModal('none')}>
                     <div className="admin-modal" onClick={e => e.stopPropagation()}>
                         <div className="admin-modal-header">
-                            <div className="admin-modal-icon admin-modal-icon-danger">🗑️</div>
+                            <div className="admin-modal-icon admin-modal-icon-danger">
+                                <Trash2 className="w-8 h-8 text-danger" />
+                            </div>
                             <h2 className="admin-modal-title">Delete User</h2>
                             <p className="admin-modal-subtitle">
                                 This will permanently delete <strong>{selectedUser.name}</strong> and all their{' '}
@@ -449,7 +492,7 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                                 onClick={handleDeleteUser}
                                 disabled={actionLoading}
                             >
-                                {actionLoading ? '...' : 'Yes, Delete'}
+                                {actionLoading ? 'Deleting...' : 'Yes, Delete'}
                             </button>
                         </div>
                     </div>

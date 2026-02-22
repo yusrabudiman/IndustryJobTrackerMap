@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { X, MessageSquare, Send, Loader2 } from 'lucide-react'
 import type { Company, Comment } from '../types/company'
 import { getComments, addComment } from '../lib/api'
 
@@ -81,19 +82,20 @@ export default function DiscussionModal({ company, onClose }: DiscussionModalPro
                 <div className="p-6 border-b border-border/30 bg-surface-light/50 flex items-center justify-between">
                     <div className="max-w-[80%]">
                         <h2 className="text-xl font-bold text-text truncate">{company.name}</h2>
-                        <p className="text-xs text-text-muted mt-1">Community Discussion & Industry Insights</p>
+                        <p className="text-xs text-text-muted mt-1 font-medium">Community Discussion & Industry Insights</p>
                     </div>
-                    <button onClick={onClose} className="w-10 h-10 rounded-xl hover:bg-surface-lighter flex items-center justify-center transition-colors cursor-pointer">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                    <button onClick={onClose} className="w-10 h-10 rounded-xl hover:bg-surface-lighter flex items-center justify-center transition-colors cursor-pointer group">
+                        <X className="w-5 h-5 text-text-muted group-hover:text-text transition-colors" />
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
                     {/* Original Note */}
                     <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20">
                         <div className="flex items-center gap-2 mb-2 text-[10px] uppercase tracking-wider text-primary font-bold">
-                            <span>📝 OP's Notes</span>
+                            <MessageSquare className="w-3 h-3" />
+                            <span>OP's Notes</span>
                         </div>
                         <p className="text-sm text-text italic leading-relaxed">
                             "{company.notes || 'No notes provided'}"
@@ -104,7 +106,8 @@ export default function DiscussionModal({ company, onClose }: DiscussionModalPro
                         <h3 className="text-sm font-bold text-text border-l-2 border-primary pl-3">Discussion ({comments.length})</h3>
 
                         {isLoading ? (
-                            <div className="py-10 text-center animate-pulse">
+                            <div className="py-10 text-center animate-pulse flex flex-col items-center gap-3">
+                                <Loader2 className="w-6 h-6 text-primary animate-spin" />
                                 <span className="text-text-muted text-sm">Loading discussion...</span>
                             </div>
                         ) : comments.length === 0 ? (
@@ -185,13 +188,13 @@ export default function DiscussionModal({ company, onClose }: DiscussionModalPro
                             className="absolute bottom-4 right-4 w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all disabled:opacity-50 disabled:bg-text-muted cursor-pointer"
                         >
                             {isSubmitting ? (
-                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <Loader2 className="w-5 h-5 animate-spin" />
                             ) : (
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
+                                <Send className="w-4.5 h-4.5" />
                             )}
                         </button>
                     </form>
-                    {error && <p className="mt-2 text-[10px] text-danger text-center">{error}</p>}
+                    {error && <p className="mt-2 text-[10px] text-danger text-center font-bold">{error}</p>}
                 </div>
             </div>
         </div>

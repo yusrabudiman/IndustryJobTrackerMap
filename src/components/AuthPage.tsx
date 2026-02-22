@@ -1,4 +1,16 @@
 import { useState } from 'react'
+import {
+    ArrowLeft,
+    CheckCircle2,
+    AlertCircle,
+    User,
+    Mail,
+    Lock,
+    Eye,
+    EyeOff,
+    ArrowRight,
+    Info
+} from 'lucide-react'
 import { loginUser, registerUser } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 
@@ -60,9 +72,7 @@ export default function AuthPage({ onBackToLanding }: AuthPageProps) {
             {/* Back to landing button */}
             {onBackToLanding && (
                 <button onClick={onBackToLanding} className="auth-back-btn" title="Back to home">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M19 12H5M12 19l-7-7 7-7" />
-                    </svg>
+                    <ArrowLeft className="w-5 h-5" />
                     <span>Home</span>
                 </button>
             )}
@@ -71,16 +81,9 @@ export default function AuthPage({ onBackToLanding }: AuthPageProps) {
                 {/* Logo / Brand */}
                 <div className="auth-brand">
                     <div className="auth-logo">
-                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                            <rect width="40" height="40" rx="12" fill="url(#logo-grad)" />
-                            <path d="M12 20L17 25L28 14" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                            <defs>
-                                <linearGradient id="logo-grad" x1="0" y1="0" x2="40" y2="40">
-                                    <stop stopColor="#6366f1" />
-                                    <stop offset="1" stopColor="#8b5cf6" />
-                                </linearGradient>
-                            </defs>
-                        </svg>
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                            <CheckCircle2 className="w-6 h-6 text-white" />
+                        </div>
                     </div>
                     <h1 className="auth-title">Job Tracker</h1>
                     <p className="auth-subtitle">
@@ -115,7 +118,7 @@ export default function AuthPage({ onBackToLanding }: AuthPageProps) {
                         {/* Error message */}
                         {error && (
                             <div className="auth-error">
-                                <span>⚠️</span>
+                                <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
                                 <span>{error}</span>
                             </div>
                         )}
@@ -125,10 +128,7 @@ export default function AuthPage({ onBackToLanding }: AuthPageProps) {
                             <div className="auth-field">
                                 <label htmlFor="auth-name" className="auth-label">Full Name</label>
                                 <div className="auth-input-wrapper">
-                                    <svg className="auth-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                        <circle cx="12" cy="7" r="4" />
-                                    </svg>
+                                    <User className="auth-input-icon w-[18px] h-[18px]" />
                                     <input
                                         id="auth-name"
                                         type="text"
@@ -147,10 +147,7 @@ export default function AuthPage({ onBackToLanding }: AuthPageProps) {
                         <div className="auth-field">
                             <label htmlFor="auth-email" className="auth-label">Email</label>
                             <div className="auth-input-wrapper">
-                                <svg className="auth-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <rect x="2" y="4" width="20" height="16" rx="2" />
-                                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                                </svg>
+                                <Mail className="auth-input-icon w-[18px] h-[18px]" />
                                 <input
                                     id="auth-email"
                                     type="email"
@@ -168,10 +165,7 @@ export default function AuthPage({ onBackToLanding }: AuthPageProps) {
                         <div className="auth-field">
                             <label htmlFor="auth-password" className="auth-label">Password</label>
                             <div className="auth-input-wrapper">
-                                <svg className="auth-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                                </svg>
+                                <Lock className="auth-input-icon w-[18px] h-[18px]" />
                                 <input
                                     id="auth-password"
                                     type={showPassword ? 'text' : 'password'}
@@ -190,15 +184,9 @@ export default function AuthPage({ onBackToLanding }: AuthPageProps) {
                                     tabIndex={-1}
                                 >
                                     {showPassword ? (
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                                            <line x1="1" y1="1" x2="23" y2="23" />
-                                        </svg>
+                                        <EyeOff className="w-[18px] h-[18px]" />
                                     ) : (
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                            <circle cx="12" cy="12" r="3" />
-                                        </svg>
+                                        <Eye className="w-[18px] h-[18px]" />
                                     )}
                                 </button>
                             </div>
@@ -209,10 +197,7 @@ export default function AuthPage({ onBackToLanding }: AuthPageProps) {
                             <div className="auth-field">
                                 <label htmlFor="auth-confirm-password" className="auth-label">Confirm Password</label>
                                 <div className="auth-input-wrapper">
-                                    <svg className="auth-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                                    </svg>
+                                    <Lock className="auth-input-icon w-[18px] h-[18px]" />
                                     <input
                                         id="auth-confirm-password"
                                         type={showPassword ? 'text' : 'password'}
@@ -239,9 +224,7 @@ export default function AuthPage({ onBackToLanding }: AuthPageProps) {
                             ) : (
                                 <>
                                     {isLogin ? 'Sign In' : 'Create Account'}
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M5 12h14M12 5l7 7-7 7" />
-                                    </svg>
+                                    <ArrowRight className="w-[18px] h-[18px]" />
                                 </>
                             )}
                         </button>
@@ -252,7 +235,7 @@ export default function AuthPage({ onBackToLanding }: AuthPageProps) {
                         <p>
                             {isLogin ? "Don't have an account?" : 'Already have an account?'}
                             {' '}
-                            <button type="button" onClick={switchMode} className="auth-link">
+                            <button type="button" onClick={switchMode} className="auth-link font-bold">
                                 {isLogin ? 'Sign Up' : 'Sign In'}
                             </button>
                         </p>
@@ -261,10 +244,7 @@ export default function AuthPage({ onBackToLanding }: AuthPageProps) {
 
                 {/* Info badge */}
                 <div className="auth-info">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M12 16v-4M12 8h.01" />
-                    </svg>
+                    <Info className="w-3.5 h-3.5" />
                     <span>Track your food industry job applications on an interactive map</span>
                 </div>
             </div>

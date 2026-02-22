@@ -1,3 +1,4 @@
+import { Filter } from 'lucide-react'
 import { CompanyStatus, STATUS_COLORS, STATUS_LABELS } from '../types/company'
 
 interface StatusFilterProps {
@@ -19,7 +20,10 @@ export default function StatusFilter({ filteredStatuses, onChange }: StatusFilte
     return (
         <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-text-muted uppercase tracking-wider">Filter</h3>
+                <div className="flex items-center gap-1.5">
+                    <Filter className="w-3.5 h-3.5 text-text-muted" />
+                    <h3 className="text-sm font-bold text-text-muted uppercase tracking-wider">Quick Filter</h3>
+                </div>
                 <button
                     onClick={() =>
                         onChange(allActive ? [] : Object.values(CompanyStatus))
@@ -37,8 +41,8 @@ export default function StatusFilter({ filteredStatuses, onChange }: StatusFilte
                             key={status}
                             onClick={() => toggle(status)}
                             className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer border ${active
-                                    ? 'shadow-sm'
-                                    : 'opacity-40 hover:opacity-70 border-transparent'
+                                ? 'shadow-sm'
+                                : 'opacity-40 hover:opacity-70 border-transparent'
                                 }`}
                             style={active ? {
                                 background: STATUS_COLORS[status] + '22',

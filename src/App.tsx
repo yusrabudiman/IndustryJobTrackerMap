@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { Crown, Moon, Sun, LogOut, AlertTriangle } from 'lucide-react'
 import 'leaflet/dist/leaflet.css'
 import MapView from './components/MapView'
 import Sidebar from './components/Sidebar'
@@ -7,7 +8,7 @@ import CompanyList from './components/CompanyList'
 import StatusFilter from './components/StatusFilter'
 import AuthPage from './components/AuthPage'
 import LandingPage from './components/LandingPage'
-import LocationSearch from './components/LocationSearch'
+import LocationSearch from './components/LocationSearch.tsx'
 import AdminPage from './components/AdminPage'
 import DiscussionModal from './components/DiscussionModal'
 import { AuthProvider, useAuth } from './context/AuthContext'
@@ -169,7 +170,7 @@ function Dashboard() {
                                 className="p-2 rounded-lg hover:bg-surface-lighter transition-colors cursor-pointer text-amber-400"
                                 title="Admin Panel"
                             >
-                                👑
+                                <Crown className="w-5 h-5" />
                             </button>
                         )}
                         <button
@@ -177,14 +178,14 @@ function Dashboard() {
                             className="p-2 rounded-lg hover:bg-surface-lighter transition-colors cursor-pointer"
                             title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                         >
-                            {theme === 'dark' ? '🌙' : '☀️'}
+                            {theme === 'dark' ? (
+                                <Moon className="w-5 h-5 text-text" />
+                            ) : (
+                                <Sun className="w-5 h-5 text-text" />
+                            )}
                         </button>
                         <button onClick={logout} className="logout-btn" title="Sign Out">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                                <polyline points="16 17 21 12 16 7" />
-                                <line x1="21" y1="12" x2="9" y2="12" />
-                            </svg>
+                            <LogOut className="w-4.5 h-4.5" />
                         </button>
                     </div>
                 </div>
@@ -196,7 +197,7 @@ function Dashboard() {
 
                 {error && (
                     <div className="p-3 rounded-lg bg-danger/15 border border-danger/30 text-danger text-xs flex items-start gap-2">
-                        <span className="mt-0.5">⚠️</span>
+                        <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
                         <div>
                             <p>{error}</p>
                             <button

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { MessageCircle, Globe, Lock, Trash2, Loader2, Star, StickyNote, Factory, ChevronDown } from 'lucide-react'
 import type { Company } from '../types/company'
 import { CompanyStatus, STATUS_COLORS, STATUS_LABELS } from '../types/company'
 
@@ -49,34 +50,34 @@ function CompanyCard({ company, isOwner, onSelect, onToggleVisibility, onUpdate,
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     <button
                         onClick={(e) => { e.stopPropagation(); onOpenDiscussion(company); }}
-                        className="text-xs px-2 py-1 rounded-md cursor-pointer transition-colors duration-200 hover:bg-primary/20 hover:text-primary"
+                        className="p-1.5 rounded-md cursor-pointer transition-colors duration-200 hover:bg-primary/20 hover:text-primary text-text-muted"
                         title="Discussion"
                     >
-                        💬
+                        <MessageCircle className="w-3.5 h-3.5" />
                     </button>
                     {isOwner && (
                         <button
                             onClick={(e) => { e.stopPropagation(); onToggleVisibility(company.id, !company.isPublic); }}
-                            className="text-xs px-2 py-1 rounded-md cursor-pointer transition-colors duration-200 hover:bg-surface-lighter/50"
+                            className="p-1.5 rounded-md cursor-pointer transition-colors duration-200 hover:bg-surface-lighter/50 text-text-muted"
                             title={company.isPublic ? 'Make Private' : 'Make Public'}
                         >
-                            {company.isPublic ? '🌍' : '🔒'}
+                            {company.isPublic ? <Globe className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
                         </button>
                     )}
                     {isOwner && (
                         <button
                             onClick={(e) => { e.stopPropagation(); onDelete(company.id); }}
                             disabled={isDeleting}
-                            className="text-danger/70 hover:text-danger text-xs px-2 py-1 rounded-md hover:bg-danger/10 cursor-pointer disabled:opacity-50"
+                            className="text-danger/70 hover:text-danger p-1.5 rounded-md hover:bg-danger/10 cursor-pointer disabled:opacity-50"
                             title="Delete company"
                         >
-                            {isDeleting ? '...' : '✕'}
+                            {isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                         </button>
                     )}
                 </div>
             </div>
-            {/* ... rest of the component remains the same ... */}
-            <div className="flex items-center gap-2 flex-wrap">
+
+            <div className="flex items-center gap-2 flex-wrap mb-2">
                 <span
                     className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
                     style={{
@@ -87,8 +88,8 @@ function CompanyCard({ company, isOwner, onSelect, onToggleVisibility, onUpdate,
                 >
                     {STATUS_LABELS[company.status as CompanyStatus]}
                 </span>
-                <span className="text-[11px] text-warning flex items-center gap-0.5">
-                    ★ {getAverageRating(company)}
+                <span className="text-[11px] text-warning flex items-center gap-0.5 font-bold">
+                    <Star className="w-3 h-3 fill-warning" /> {getAverageRating(company)}
                 </span>
                 <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${company.isPublic
                     ? 'bg-success/15 text-success border border-success/30'
@@ -101,9 +102,12 @@ function CompanyCard({ company, isOwner, onSelect, onToggleVisibility, onUpdate,
                 </span>
             </div>
             {company.notes && (
-                <p className="text-[11px] text-text-muted/70 mt-2 line-clamp-2 leading-relaxed">
-                    📝 {company.notes}
-                </p>
+                <div className="flex items-start gap-1.5 p-2 rounded-lg bg-surface-lighter/50 border border-border/5">
+                    <StickyNote className="w-3 h-3 text-text-muted/40 mt-0.5" />
+                    <p className="text-[11px] text-text-muted/70 line-clamp-2 leading-relaxed italic">
+                        {company.notes}
+                    </p>
+                </div>
             )}
         </div>
     )
@@ -115,8 +119,8 @@ export default function CompanyList({ companies, onDelete, onToggleVisibility, o
     if (companies.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="text-5xl mb-4 opacity-40">🏭</div>
-                <p className="text-text-muted text-sm">No companies tracked yet.</p>
+                <Factory className="w-16 h-16 text-border/40 mb-4 stroke-1" />
+                <p className="text-text-muted text-sm font-bold">No companies tracked yet.</p>
                 <p className="text-text-muted/60 text-xs mt-1">Click the map and fill in the form to start!</p>
             </div>
         )
@@ -135,7 +139,7 @@ export default function CompanyList({ companies, onDelete, onToggleVisibility, o
                         {myCompanies.length}
                     </span>
                 </h3>
-                <div className="flex flex-col gap-2 max-h-[35vh] overflow-y-auto pr-1">
+                <div className="flex flex-col gap-2 max-h-[35vh] overflow-y-auto pr-1 custom-scrollbar">
                     {myCompanies.length > 0 ? (
                         myCompanies.map(c => (
                             <CompanyCard
@@ -165,9 +169,7 @@ export default function CompanyList({ companies, onDelete, onToggleVisibility, o
                     >
                         <div className="flex items-center gap-2">
                             <span>Others Public Tracks</span>
-                            <span className={`text-[10px] transition-transform duration-200 ${showOthers ? 'rotate-180' : ''}`}>
-                                ▼
-                            </span>
+                            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showOthers ? 'rotate-180' : ''}`} />
                         </div>
                         <span className="bg-surface-lighter text-text-muted text-[10px] px-2 py-0.5 rounded-full font-bold group-hover:bg-primary/20 group-hover:text-primary transition-colors">
                             {othersCompanies.length}
@@ -175,7 +177,7 @@ export default function CompanyList({ companies, onDelete, onToggleVisibility, o
                     </button>
 
                     {showOthers && (
-                        <div className="flex flex-col gap-2 max-h-[35vh] overflow-y-auto pr-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="flex flex-col gap-2 max-h-[35vh] overflow-y-auto pr-1 animate-in fade-in slide-in-from-top-2 duration-200 custom-scrollbar">
                             {othersCompanies.map(c => (
                                 <CompanyCard
                                     key={c.id}

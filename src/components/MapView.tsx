@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { MessageSquare, Edit3, MessageCircle } from 'lucide-react'
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import type { Company } from '../types/company'
@@ -192,17 +193,21 @@ export default function MapView({ companies, filteredStatuses, onMapClick, selec
                                         className="mt-1 p-2 bg-primary/5 hover:bg-primary/10 rounded-lg text-xs text-text-muted leading-relaxed border border-primary/10 hover:border-primary/30 transition-all cursor-pointer group"
                                     >
                                         <div className="flex justify-between items-center mb-1">
-                                            <span className="font-bold text-[10px] text-primary uppercase">Industry Discussion</span>
+                                            <div className="flex items-center gap-1.5">
+                                                <MessageSquare className="w-3 h-3 text-primary" />
+                                                <span className="font-bold text-[10px] text-primary uppercase">Industry Discussion</span>
+                                            </div>
                                             <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-primary">View →</span>
                                         </div>
-                                        <p className="line-clamp-2 italic">📝 {company.notes}</p>
+                                        <p className="line-clamp-2 italic">{company.notes}</p>
                                     </div>
                                 )}
                                 <button
                                     onClick={() => onOpenDiscussion(company)}
                                     className="w-full mt-2 py-1.5 px-3 bg-surface-lighter hover:bg-surface-light text-text text-[11px] font-bold rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2 border border-border/30"
                                 >
-                                    💬 Join Community Discussion
+                                    <MessageCircle className="w-3.5 h-3.5 text-primary" />
+                                    Join Community Discussion
                                 </button>
                                 {company.userId === currentUserId && (
                                     <div className="mt-3 pt-2 border-t border-border/20 flex flex-col gap-2">
@@ -210,7 +215,8 @@ export default function MapView({ companies, filteredStatuses, onMapClick, selec
                                             onClick={() => onEdit(company)}
                                             className="w-full py-1.5 px-3 bg-primary text-white text-[11px] font-bold rounded-lg hover:bg-primary-dark transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
                                         >
-                                            ✏️ Edit This Tracker
+                                            <Edit3 className="w-3.5 h-3.5" />
+                                            Edit This Tracker
                                         </button>
                                         <p className="text-[10px] text-text-muted text-center opacity-60">
                                             or manually edit in sidebar

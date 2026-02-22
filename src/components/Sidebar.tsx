@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Menu, X, Utensils } from 'lucide-react'
 
 interface SidebarProps {
     isOpen: boolean
@@ -17,30 +18,11 @@ export default function Sidebar({ isOpen, onToggle, children }: SidebarProps) {
           hover:shadow-lg hover:shadow-primary/10 active:scale-95"
                 title={isOpen ? 'Close sidebar' : 'Open sidebar'}
             >
-                <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
-                >
-                    {isOpen ? (
-                        <>
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
-                        </>
-                    ) : (
-                        <>
-                            <line x1="3" y1="6" x2="21" y2="6" />
-                            <line x1="3" y1="12" x2="15" y2="12" />
-                            <line x1="3" y1="18" x2="21" y2="18" />
-                        </>
-                    )}
-                </svg>
+                {isOpen ? (
+                    <X className="w-5 h-5 transition-transform duration-300" />
+                ) : (
+                    <Menu className="w-5 h-5 transition-transform duration-300" />
+                )}
             </button>
 
             {/* Backdrop on mobile */}
@@ -61,7 +43,7 @@ export default function Sidebar({ isOpen, onToggle, children }: SidebarProps) {
                 <div className="sticky top-0 z-10 px-5 pt-5 pb-4 border-b border-border/30 bg-surface-light backdrop-blur-md">
                     <div className="flex items-center gap-3 ml-12">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-xl shadow-lg shadow-primary/20">
-                            🍔
+                            <Utensils className="w-6 h-6 text-white" />
                         </div>
                         <div>
                             <h1 className="text-base font-bold text-text leading-tight">Food Job Tracker</h1>
