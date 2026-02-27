@@ -161,3 +161,52 @@ export async function deleteAdminUser(id: string): Promise<void> {
         throw new Error(data?.error || 'Failed to delete user')
     }
 }
+// ─── Chat ────────────────────────────────────────────────────
+export async function getConversations() {
+    const res = await fetch(`${API_BASE}/chat/conversations`, {
+        headers: getAuthHeaders(),
+    })
+    const data = await safeJson(res)
+    if (!res.ok) throw new Error(data?.error || 'Failed to fetch conversations')
+    return data
+}
+
+export async function getMessages(conversationId: string) {
+    const res = await fetch(`${API_BASE}/chat/messages?conversationId=${conversationId}`, {
+        headers: getAuthHeaders(),
+    })
+    const data = await safeJson(res)
+    if (!res.ok) throw new Error(data?.error || 'Failed to fetch messages')
+    return data
+}
+
+export async function createConversation(participantId: string) {
+    const res = await fetch(`${API_BASE}/chat/conversations`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ participantId }),
+    })
+    const data = await safeJson(res)
+    if (!res.ok) throw new Error(data?.error || 'Failed to create conversation')
+    return data
+}
+
+export async function sendMessage(conversationId: string, content: string) {
+    const res = await fetch(`${API_BASE}/chat/messages?conversationId=${conversationId}`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ content }),
+    })
+    const data = await safeJson(res)
+    if (!res.ok) throw new Error(data?.error || 'Failed to send message')
+    return data
+}
+
+export async function searchUsers(query: string) {
+    const res = await fetch(`${API_BASE}/users/search?q=${encodeURIComponent(query)}`, {
+        headers: getAuthHeaders(),
+    })
+    const data = await safeJson(res)
+    if (!res.ok) throw new Error(data?.error || 'Failed to search users')
+    return data
+}

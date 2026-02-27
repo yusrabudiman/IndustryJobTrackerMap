@@ -1,5 +1,6 @@
 import 'dotenv/config'
 import http from 'http'
+import { Server } from 'socket.io'
 
 // Import Vercel-style handlers
 import companiesHandler from './api/companies'
@@ -10,6 +11,9 @@ import loginHandler from './api/auth/login'
 import meHandler from './api/auth/me'
 import adminUsersHandler from './api/admin/users/index'
 import adminUserByIdHandler from './api/admin/users/[id]'
+import chatConversationsHandler from './api/chat/conversations'
+import chatMessagesHandler from './api/chat/messages'
+import userSearchHandler from './api/users/search'
 
 const PORT = 3001
 
@@ -143,6 +147,24 @@ const server = http.createServer(async (req, res) => {
             return
         }
 
+        // Route: /api/chat/conversations
+        if (pathname === '/api/chat/conversations') {
+            await chatConversationsHandler(mockReq, mockRes)
+            return
+        }
+
+        // Route: /api/chat/messages
+        if (pathname === '/api/chat/messages') {
+            await chatMessagesHandler(mockReq, mockRes)
+            return
+        }
+
+        // Route: /api/users/search
+        if (pathname === '/api/users/search') {
+            await userSearchHandler(mockReq, mockRes)
+            return
+        }
+
         // 404
         console.warn(`[DEV] !!! 404 Not Found !!! Path: "${pathname}" Method: ${req.method}`)
         res.writeHead(404, { 'Content-Type': 'application/json' })
@@ -157,6 +179,35 @@ const server = http.createServer(async (req, res) => {
             }))
         }
     }
+})
+
+// === Socket.io Setup ===
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+})
+
+io.on('connection', (socket) => {
+    console.log(`[SOCKET] User connected: ${socket.id}`)
+
+    socket.on('join_room', (conversationId) => {
+        socket.join(conversationId)
+        console.log(`[SOCKET] User ${socket.id} joined room: ${conversationId}`)
+    })
+
+    socket.on('send_message', (data) => {
+        // data should contain: conversationId, content, senderId, senderName, etc.
+        console.log(`[SOCKET] Message received in ${data.conversationId}:`, data.content)
+
+        // Broadcast to everyone in the room
+        io.to(data.conversationId).emit('receive_message', data)
+    })
+
+    socket.on('disconnect', () => {
+        console.log(`[SOCKET] User disconnected: ${socket.id}`)
+    })
 })
 
 server.listen(PORT, '127.0.0.1', () => {

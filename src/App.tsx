@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Crown, Moon, Sun, LogOut, AlertTriangle } from 'lucide-react'
+import { Crown, Moon, Sun, LogOut, AlertTriangle, MessageCircle } from 'lucide-react'
 import 'leaflet/dist/leaflet.css'
 import MapView from './components/MapView'
 import Sidebar from './components/Sidebar'
@@ -11,6 +11,7 @@ import LandingPage from './components/LandingPage'
 import LocationSearch from './components/LocationSearch.tsx'
 import AdminPage from './components/AdminPage'
 import DiscussionModal from './components/DiscussionModal'
+import { ChatContainer } from './components/Chat/ChatContainer'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ThemeProvider, useTheme } from './context/ThemeContext'
 import { getCompanies, createCompany, deleteCompany, updateCompany } from './lib/api'
@@ -31,6 +32,7 @@ function Dashboard() {
     const [isDeleting, setIsDeleting] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
     const [discussionCompany, setDiscussionCompany] = useState<Company | null>(null)
+    const [isChatOpen, setIsChatOpen] = useState(false)
 
     const loadCompanies = useCallback(async () => {
         try {
@@ -239,12 +241,33 @@ function Dashboard() {
                 />
             </Sidebar>
 
+            {/* Floating Chat Button - Bottom Right */}
+            <button
+                onClick={() => setIsChatOpen(true)}
+                className="fixed bottom-6 right-6 z-[5000] flex items-center justify-center gap-2 p-4 rounded-2xl bg-primary text-white font-semibold shadow-2xl shadow-primary/40 hover:shadow-primary/60 transition-all hover:-translate-y-1 active:scale-95 group cursor-pointer"
+                title="Private Messages"
+            >
+                <div className="relative">
+                    <MessageCircle className="w-6 h-6" />
+                    {/* Optional: Add a pulse effect to the icon if there are notifications */}
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-danger rounded-full border-2 border-surface animate-pulse hidden" />
+                </div>
+                <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out whitespace-nowrap">
+                    Private Messages
+                </span>
+            </button>
+
             {discussionCompany && (
                 <DiscussionModal
                     company={discussionCompany}
                     onClose={() => setDiscussionCompany(null)}
                 />
             )}
+
+            <ChatContainer
+                isOpen={isChatOpen}
+                onClose={() => setIsChatOpen(false)}
+            />
         </div>
     )
 }

@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
@@ -18,6 +18,10 @@ model User {
   createdAt   DateTime  @default(now())
   companies   Company[]
   comments    Comment[]
+
+  // Chat relations
+  conversations Conversation[] @relation("UserConversations")
+  messages      Message[]
 }
 
 enum Role {
@@ -64,6 +68,33 @@ model Comment {
   @@index([companyId])
   @@index([userId])
   @@index([parentId])
+}
+
+model Conversation {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastMessageAt DateTime @default(now())
+
+  participants User[]    @relation("UserConversations")
+  messages     Message[]
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  senderId String
+  sender   User   @relation(fields: [senderId], references: [id])
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([isRead])
 }
 
 enum CompanyStatus {
