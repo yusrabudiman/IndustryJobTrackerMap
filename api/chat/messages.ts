@@ -1,33 +1,34 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { prisma } from '../../src/lib/prisma'
-import { verifyToken } from '../../src/lib/jwt'
+import { getUserFromRequest } from '../lib/auth'
+import { setCORSHeaders, setSecurityHeaders } from '../lib/security'
+import { z } from 'zod'
+
+const MessageSchema = z.object({
+    content: z.string().min(1, 'Content required').max(5000, 'Message too long'),
+})
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-    res.setHeader('Access-Control-Allow-Origin', '*')
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    setCORSHeaders(req, res, 'GET, POST, OPTIONS')
+    setSecurityHeaders(res)
 
     if (req.method === 'OPTIONS') return res.status(200).end()
 
     try {
-        const authHeader = req.headers.authorization
-        if (!authHeader?.startsWith('Bearer ')) {
-            return res.status(401).json({ error: 'Unauthorized' })
-        }
-
-        const token = authHeader.substring(7)
-        const payload = await verifyToken(token)
-        if (!payload) return res.status(401).json({ error: 'Invalid token' })
+        const payload = await getUserFromRequest(req)
+        if (!payload) return res.status(401).json({ error: 'Unauthorized' })
 
         const userId = payload.userId
         const { conversationId } = req.query
 
-        if (!conversationId) return res.status(400).json({ error: 'Conversation ID required' })
+        if (!conversationId || typeof conversationId !== 'string') {
+            return res.status(400).json({ error: 'Conversation ID required' })
+        }
 
-        // Check if user is participant
+        // Verify user is a participant before any action
         const conversation = await prisma.conversation.findFirst({
             where: {
-                id: conversationId as string,
+                id: conversationId,
                 participants: { some: { id: userId } }
             }
         })
@@ -36,7 +37,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         if (req.method === 'GET') {
             const messages = await prisma.message.findMany({
-                where: { conversationId: conversationId as string },
+                where: { conversationId },
                 include: { sender: { select: { id: true, name: true } } },
                 orderBy: { createdAt: 'asc' }
             })
@@ -44,25 +45,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
 
         if (req.method === 'POST') {
-            const { content } = req.body
-            if (!content) return res.status(400).json({ error: 'Message content required' })
+            const validation = MessageSchema.safeParse(req.body)
+            if (!validation.success) {
+                return res.status(400).json({ error: 'Message content is required (max 5000 chars)' })
+            }
 
             const message = await prisma.message.create({
                 data: {
-                    content,
+                    content: validation.data.content,
                     senderId: userId,
-                    conversationId: conversationId as string
+                    conversationId,
                 },
                 include: { sender: { select: { id: true, name: true } } }
             })
 
-            // Update conversation lastMessageAt and updatedAt
             await prisma.conversation.update({
-                where: { id: conversationId as string },
-                data: {
-                    updatedAt: new Date(),
-                    lastMessageAt: new Date()
-                }
+                where: { id: conversationId },
+                data: { updatedAt: new Date(), lastMessageAt: new Date() }
             })
 
             return res.status(201).json(message)
@@ -70,7 +69,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         return res.status(405).json({ error: 'Method not allowed' })
     } catch (error) {
-        console.error('Messages API Error:', error)
+        console.error('Messages API error:', error)
         return res.status(500).json({ error: 'Internal server error' })
     }
 }

@@ -1,21 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { prisma } from '../../src/lib/prisma'
-import { verifyToken } from '../../src/lib/jwt'
+import { getUserFromRequest } from '../lib/auth'
+import { setCORSHeaders, setSecurityHeaders } from '../lib/security'
 import { z } from 'zod'
 
-async function getUserFromRequest(req: VercelRequest) {
-    const authHeader = req.headers.authorization
-    if (!authHeader?.startsWith('Bearer ')) return null
-    const token = authHeader.substring(7)
-    return verifyToken(token)
-}
-
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-    // CORS headers
-    res.setHeader('Access-Control-Allow-Origin', '*')
-    res.setHeader('Access-Control-Allow-Methods', 'DELETE, PATCH, OPTIONS')
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    setCORSHeaders(req, res, 'DELETE, PATCH, OPTIONS')
+    setSecurityHeaders(res)
 
     if (req.method === 'OPTIONS') {
         return res.status(200).end()
@@ -49,8 +40,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
 
         if (req.method === 'PATCH') {
-            console.log(`[PATCH] Updating company ${id}`, req.body)
-            // Define schema for partial updates
             const CompanyUpdateSchema = z.object({
                 name: z.string().min(1).optional(),
                 subSector: z.string().min(1).optional(),
@@ -66,36 +55,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
             const validation = CompanyUpdateSchema.safeParse(req.body)
             if (!validation.success) {
-                console.warn(`[PATCH] Validation failed for ${id}:`, validation.error.flatten().fieldErrors)
                 return res.status(400).json({
                     error: 'Validation failed',
                     details: validation.error.flatten().fieldErrors,
                 })
             }
 
-            // Only update what was sent in the valid payload
-            // This also ensures fields like 'id' or 'userId' are ignored
-            try {
-                const updated = await prisma.company.update({
-                    where: { id },
-                    data: validation.data,
-                    include: { user: { select: { name: true } } },
-                })
-                console.log(`[PATCH] Successfully updated company ${id}`)
-                return res.status(200).json(updated)
-            } catch (dbError) {
-                console.error(`[PATCH] Database error updating ${id}:`, dbError)
-                throw dbError
-            }
+            const updated = await prisma.company.update({
+                where: { id },
+                data: validation.data,
+                include: { user: { select: { name: true } } },
+            })
+            return res.status(200).json(updated)
         }
 
         return res.status(405).json({ error: 'Method not allowed' })
     } catch (error) {
-        console.error('API Error Update:', error)
-        // If it's a Prisma error, we might want more detail in logs
-        return res.status(500).json({
-            error: 'Internal server error',
-            message: error instanceof Error ? error.message : 'Unknown error'
-        })
+        console.error('Company update/delete error:', error)
+        return res.status(500).json({ error: 'Internal server error' })
     }
 }

@@ -1,24 +1,16 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { prisma } from '../../../src/lib/prisma'
-import { verifyToken } from '../../../src/lib/jwt'
+import { getUserFromRequest } from '../../lib/auth'
+import { setCORSHeaders, setSecurityHeaders } from '../../lib/security'
 import { z } from 'zod'
 
-async function getUserFromRequest(req: VercelRequest) {
-    const authHeader = req.headers.authorization
-    if (!authHeader?.startsWith('Bearer ')) return null
-    const token = authHeader.substring(7)
-    return verifyToken(token)
-}
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-    const { id: companyId } = req.query
-    console.log(`[COMMENTS API] Method: ${req.method}, CompanyID: ${companyId}`)
-
-    res.setHeader('Access-Control-Allow-Origin', '*')
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    setCORSHeaders(req, res, 'GET, POST, OPTIONS')
+    setSecurityHeaders(res)
 
     if (req.method === 'OPTIONS') return res.status(200).end()
+
+    const { id: companyId } = req.query
 
     if (typeof companyId !== 'string') {
         return res.status(400).json({ error: 'Invalid company ID' })
@@ -26,10 +18,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     try {
         if (req.method === 'GET') {
+            // Verify the company exists and check visibility
+            const company = await prisma.company.findUnique({ where: { id: companyId } })
+            if (!company) return res.status(404).json({ error: 'Company not found' })
+
+            const user = await getUserFromRequest(req)
+
+            // SEC-007 fix: only allow comments if company is public OR user is the owner
+            if (!company.isPublic && company.userId !== user?.userId) {
+                return res.status(403).json({ error: 'Access denied' })
+            }
+
             const comments = await prisma.comment.findMany({
                 where: { companyId },
                 include: { user: { select: { name: true } } },
-                orderBy: { createdAt: 'asc' }
+                orderBy: { createdAt: 'asc' },
             })
             return res.status(200).json(comments)
         }
@@ -42,12 +45,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
             const schema = z.object({
                 content: z.string().min(1).max(1000),
-                parentId: z.string().optional().nullable()
+                parentId: z.string().optional().nullable(),
             })
 
             const validation = schema.safeParse(req.body)
             if (!validation.success) {
-                return res.status(400).json({ error: 'Comment content is required' })
+                return res.status(400).json({ error: 'Comment content is required (max 1000 chars)' })
             }
 
             const comment = await prisma.comment.create({
@@ -55,9 +58,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     content: validation.data.content,
                     companyId,
                     userId: user.userId,
-                    parentId: validation.data.parentId || undefined
+                    parentId: validation.data.parentId || undefined,
                 },
-                include: { user: { select: { name: true } } }
+                include: { user: { select: { name: true } } },
             })
 
             return res.status(201).json(comment)
@@ -65,7 +68,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         return res.status(405).json({ error: 'Method not allowed' })
     } catch (error) {
-        console.error('Comment API error:', error)
+        console.error('Comments API error:', error)
         return res.status(500).json({ error: 'Internal server error' })
     }
 }

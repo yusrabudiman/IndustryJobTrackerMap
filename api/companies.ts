@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { prisma } from '../src/lib/prisma'
-import { verifyToken } from '../src/lib/jwt'
+import { getUserFromRequest } from './lib/auth'
+import { setCORSHeaders, setSecurityHeaders } from './lib/security'
 import { z } from 'zod'
 
 const CompanyCreateSchema = z.object({
@@ -16,18 +17,9 @@ const CompanyCreateSchema = z.object({
     isPublic: z.boolean().default(false),
 })
 
-async function getUserFromRequest(req: VercelRequest) {
-    const authHeader = req.headers.authorization
-    if (!authHeader?.startsWith('Bearer ')) return null
-    const token = authHeader.substring(7)
-    return verifyToken(token)
-}
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-    // CORS headers
-    res.setHeader('Access-Control-Allow-Origin', '*')
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    setCORSHeaders(req, res, 'GET, POST, OPTIONS')
+    setSecurityHeaders(res)
 
     if (req.method === 'OPTIONS') {
         return res.status(200).end()
@@ -87,7 +79,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         return res.status(405).json({ error: 'Method not allowed' })
     } catch (error) {
-        console.error('API Error:', error)
+        console.error('Companies API error:', error)
         return res.status(500).json({ error: 'Internal server error' })
     }
 }

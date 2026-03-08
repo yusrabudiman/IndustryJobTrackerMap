@@ -43,7 +43,7 @@ export default function AuthPage({ onBackToLanding }: AuthPageProps) {
                 ? await loginUser(email, password)
                 : await registerUser(name, email, password)
 
-            login(result.token, result.user)
+            login(result.user)
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Something went wrong')
         } finally {
@@ -173,7 +173,7 @@ export default function AuthPage({ onBackToLanding }: AuthPageProps) {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
-                                    minLength={6}
+                                    minLength={8}
                                     className="auth-input"
                                     autoComplete={isLogin ? 'current-password' : 'new-password'}
                                 />
@@ -192,6 +192,13 @@ export default function AuthPage({ onBackToLanding }: AuthPageProps) {
                             </div>
                         </div>
 
+                        {/* Password requirements hint (sign up only) */}
+                        {!isLogin && (
+                            <p className="text-xs text-text-muted mt-1 px-1">
+                                Min. 8 characters, include an uppercase letter and a number.
+                            </p>
+                        )}
+
                         {/* Confirm password (sign up only) */}
                         {!isLogin && (
                             <div className="auth-field">
@@ -205,7 +212,7 @@ export default function AuthPage({ onBackToLanding }: AuthPageProps) {
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                         required
-                                        minLength={6}
+                                        minLength={8}
                                         className="auth-input"
                                         autoComplete="new-password"
                                     />

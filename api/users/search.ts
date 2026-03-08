@@ -1,38 +1,36 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { prisma } from '../../src/lib/prisma'
-import { verifyToken } from '../../src/lib/jwt'
+import { getUserFromRequest } from '../lib/auth'
+import { setCORSHeaders, setSecurityHeaders } from '../lib/security'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-    res.setHeader('Access-Control-Allow-Origin', '*')
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    setCORSHeaders(req, res, 'GET, OPTIONS')
+    setSecurityHeaders(res)
 
     if (req.method === 'OPTIONS') return res.status(200).end()
     if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' })
 
     try {
-        const authHeader = req.headers.authorization
-        if (!authHeader?.startsWith('Bearer ')) {
-            return res.status(401).json({ error: 'Unauthorized' })
-        }
-
-        const token = authHeader.substring(7)
-        const payload = await verifyToken(token)
-        if (!payload) return res.status(401).json({ error: 'Invalid token' })
+        const payload = await getUserFromRequest(req)
+        if (!payload) return res.status(401).json({ error: 'Unauthorized' })
 
         const { q } = req.query
         if (!q || typeof q !== 'string') return res.status(200).json([])
 
+        // Limit search query length to prevent abuse
+        const query = q.substring(0, 100)
+
         const users = await prisma.user.findMany({
             where: {
                 OR: [
-                    { name: { contains: q, mode: 'insensitive' } },
-                    { email: { contains: q, mode: 'insensitive' } }
+                    { name: { contains: query, mode: 'insensitive' } },
+                    { email: { contains: query, mode: 'insensitive' } },
                 ],
-                NOT: { id: payload.userId }
+                NOT: { id: payload.userId },
+                isActive: true, // Only return active users
             },
             select: { id: true, name: true, email: true },
-            take: 10
+            take: 10,
         })
 
         return res.status(200).json(users)

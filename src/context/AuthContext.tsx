@@ -1,13 +1,12 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import type { ReactNode } from 'react'
 import type { User } from '../types/company'
-import { getMe } from '../lib/api'
+import { getMe, logoutUser } from '../lib/api'
 
 interface AuthContextType {
     user: User | null
-    token: string | null
     isLoading: boolean
-    login: (token: string, user: User) => void
+    login: (user: User) => void
     logout: () => void
 }
 
@@ -15,37 +14,39 @@ const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null)
-    const [token, setToken] = useState<string | null>(() => localStorage.getItem('auth_token'))
     const [isLoading, setIsLoading] = useState(true)
 
-    const logout = useCallback(() => {
-        localStorage.removeItem('auth_token')
-        setToken(null)
-        setUser(null)
+    const logout = useCallback(async () => {
+        try {
+            // Tell the server to clear the HttpOnly cookie
+            await logoutUser()
+        } catch {
+            // Even if the server call fails, clear local state
+        } finally {
+            setUser(null)
+        }
     }, [])
 
     useEffect(() => {
-        if (!token) {
-            setIsLoading(false)
-            return
-        }
-
+        // On mount: verify session by calling /api/auth/me
+        // The HttpOnly cookie is sent automatically — no localStorage token needed
         getMe()
             .then((u) => setUser(u))
             .catch(() => {
-                logout()
+                // No valid session — stay logged out (cookie expired or not set)
+                setUser(null)
             })
             .finally(() => setIsLoading(false))
-    }, [token, logout])
+    }, [])
 
-    const login = useCallback((newToken: string, newUser: User) => {
-        localStorage.setItem('auth_token', newToken)
-        setToken(newToken)
+    const login = useCallback((newUser: User) => {
+        // The token is already in the HttpOnly cookie (set by server on login/register)
+        // We only need to store the user profile in React state
         setUser(newUser)
     }, [])
 
     return (
-        <AuthContext.Provider value={{ user, token, isLoading, login, logout }}>
+        <AuthContext.Provider value={{ user, isLoading, login, logout }}>
             {children}
         </AuthContext.Provider>
     )
