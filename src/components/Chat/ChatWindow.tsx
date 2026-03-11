@@ -100,6 +100,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                         onChange={(e) => setInput(e.target.value)}
                         placeholder="Message..."
                         className="flex-1 bg-transparent border-none focus:outline-none text-sm"
+                        autoFocus
                     />
                     <button
                         type="submit"

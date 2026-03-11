@@ -65,6 +65,8 @@ model Comment {
   parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies  Comment[] @relation("CommentReplies")
 
+  images   String[]  @default([])
+
   @@index([companyId])
   @@index([userId])
   @@index([parentId])

@@ -10,9 +10,10 @@ import { socketService } from '../../lib/socket';
 interface ChatContainerProps {
     isOpen: boolean;
     onClose: () => void;
+    onOpen?: () => void;
 }
 
-export const ChatContainer: React.FC<ChatContainerProps> = ({ isOpen, onClose }) => {
+export const ChatContainer: React.FC<ChatContainerProps> = ({ isOpen, onClose, onOpen }) => {
     const { user } = useAuth();
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [activeConvId, setActiveConvId] = useState<string | null>(null);
@@ -44,31 +45,45 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({ isOpen, onClose })
     }, []);
 
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && onOpen) onOpen();
+    }, [isOpen, onOpen]);
+
+    // Background socket logic - Always run regardless of isOpen
+    useEffect(() => {
+        loadConversations();
+        const socket = socketService.connect();
+
+        const handleReceiveMessage = (payload: any) => {
+            console.log('[Chat] Received message:', payload);
+            if (payload.conversationId === activeConvId) {
+                setMessages(prev => {
+                    const isDuplicate = prev.some(m =>
+                        m.id === payload.id ||
+                        (m.id.startsWith('temp-') && m.senderId === payload.senderId && m.content === payload.content)
+                    );
+                    if (isDuplicate) return prev;
+                    return [...prev, payload];
+                });
+            }
             loadConversations();
-            const socket = socketService.connect();
+        };
 
-            socket.on('receive_message', (payload: any) => {
-                if (payload.conversationId === activeConvId) {
-                    setMessages(prev => {
-                        // Hindari duplikasi pesan (terutama untuk pesan optimis/live)
-                        const isDuplicate = prev.some(m =>
-                            m.id === payload.id ||
-                            (m.id.startsWith('temp-') && m.senderId === payload.senderId && m.content === payload.content)
-                        );
-                        if (isDuplicate) return prev;
-                        return [...prev, payload];
-                    });
-                }
-                // Perbarui daftar percakapan untuk pratinjau pesan terbaru
-                loadConversations();
-            });
+        const handleNotification = (data: any) => {
+            console.log('[Chat] Received notification:', data);
+            loadConversations();
+            if (data.type === 'new_conversation' || data.type === 'new_message') {
+                socket.emit('join_room', data.conversationId);
+            }
+        };
 
-            return () => {
-                socket.off('receive_message');
-            };
-        }
-    }, [isOpen, activeConvId, loadConversations]);
+        socket.on('receive_message', handleReceiveMessage);
+        socket.on('notification', handleNotification);
+
+        return () => {
+            socket.off('receive_message', handleReceiveMessage);
+            socket.off('notification', handleNotification);
+        };
+    }, [activeConvId, loadConversations]); // Re-bind if activeConvId changes
 
     useEffect(() => {
         if (activeConvId) {
@@ -139,28 +154,33 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({ isOpen, onClose })
             setActiveConvId(conv.id);
             setSearchQuery('');
             setSearchResults([]);
+            
+            // Notify other party immediately
+            const socket = socketService.getSocket();
+            if (socket) {
+                socket.emit('new_conversation', { 
+                    conversationId: conv.id, 
+                    participantId: targetUser.id 
+                });
+            }
+
             loadConversations();
         } catch (err) {
             console.error('Failed to start chat:', err);
         }
     };
 
-    if (!isOpen) return null;
-
     const activeConv = conversations.find(c => c.id === activeConvId);
-
-    // Final logic for partner identification
     const partner = activeConv?.participants.find(p => p.id !== user?.id) || selectedUser;
 
+    // Use CSS classes to hide/show instead of React null render so sockets and state persist
     return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-10">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-
-            <div className="relative w-full max-w-5xl h-full max-h-[800px] glass rounded-2xl overflow-hidden flex shadow-2xl flex-col md:flex-row">
+        <div className={`fixed bottom-[90px] right-4 md:right-6 z-[4900] pointer-events-none flex items-end justify-end transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 select-none pointer-events-none translate-y-4'}`} style={{ display: isOpen ? 'flex' : 'none' }}>
+            <div className={`relative w-[calc(100vw-2rem)] md:w-[750px] h-[550px] max-h-[80vh] bg-surface/90 backdrop-blur-xl rounded-2xl overflow-hidden shadow-2xl shadow-black/20 flex-col md:flex-row border border-border/50 animate-in slide-in-from-bottom-5 duration-300 ${isOpen ? 'flex pointer-events-auto' : 'hidden'}`}>
                 {/* Close button for mobile */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 z-10 p-2 rounded-full hover:bg-surface-lighter transition-colors md:hidden"
+                    className="absolute top-4 right-4 z-50 p-2 rounded-full hover:bg-surface-lighter transition-colors md:hidden text-text cursor-pointer bg-surface/50 backdrop-blur-sm border border-border/20"
                 >
                     <X className="w-6 h-6" />
                 </button>
@@ -169,7 +189,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({ isOpen, onClose })
                 <div className={`w-full md:w-80 h-full flex flex-col border-r border-border/30 bg-surface/50 backdrop-blur-md ${activeConvId ? 'hidden md:flex' : 'flex'}`}>
                     <div className="p-5 border-b border-border/30 flex items-center justify-between bg-surface-light/30">
                         <h2 className="text-lg font-bold tracking-tight">Messages</h2>
-                        <button onClick={onClose} className="p-1.5 hover:bg-surface-lighter rounded-lg transition-colors hidden md:block">
+                        <button onClick={onClose} className="p-1.5 hover:text-danger hover:bg-danger/10 rounded-lg transition-colors hidden md:block cursor-pointer" title="Close chat">
                             <X className="w-5 h-5" />
                         </button>
                     </div>
@@ -213,11 +233,12 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({ isOpen, onClose })
                 </div>
 
                 {/* Window */}
-                <div className={`flex-1 h-full bg-surface/30 backdrop-blur-sm ${activeConvId ? 'flex' : 'hidden md:flex'}`}>
+                <div className={`relative flex-1 h-full bg-surface/30 backdrop-blur-sm ${activeConvId ? 'flex' : 'hidden md:flex'}`}>
                     {activeConvId && (
                         <button
                             onClick={() => setActiveConvId(null)}
-                            className="absolute top-4 left-4 z-10 md:hidden p-2 rounded-full bg-surface-light shadow-md"
+                            className="absolute top-4 left-4 z-50 md:hidden p-2 rounded-full bg-surface/80 backdrop-blur-md shadow-md hover:bg-surface-light transition-colors cursor-pointer border border-border/30 text-text"
+                            title="Back to Messages"
                         >
                             <X className="w-5 h-5 rotate-90" />
                         </button>

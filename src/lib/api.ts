@@ -114,10 +114,10 @@ export async function getComments(companyId: string): Promise<Comment[]> {
     return data
 }
 
-export async function addComment(companyId: string, content: string, parentId?: string | null): Promise<Comment> {
+export async function addComment(companyId: string, content: string, parentId?: string | null, images?: string[]): Promise<Comment> {
     const res = await fetch(`${API_BASE}/companies/${companyId}/comments`, defaultOptions({
         method: 'POST',
-        body: JSON.stringify({ content, parentId }),
+        body: JSON.stringify({ content, parentId, images: images || [] }),
     }))
     const data = await safeJson(res)
     if (!res.ok) throw new Error(data?.error || 'Failed to add comment')

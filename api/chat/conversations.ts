@@ -5,7 +5,7 @@ import { setCORSHeaders, setSecurityHeaders } from '../lib/security'
 import { z } from 'zod'
 
 const ParticipantSchema = z.object({
-    participantId: z.string().uuid('Invalid participant ID format'),
+    participantId: z.string().min(1, 'Invalid participant ID format'),
 })
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

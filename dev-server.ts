@@ -212,7 +212,10 @@ const server = http.createServer(async (req, res) => {
 
 const io = new Server(server, {
     cors: {
-        origin: ALLOWED_ORIGINS,
+        origin: (origin, callback) => {
+            // Allow all origins in development (Vite, local IP, etc.)
+            callback(null, true)
+        },
         credentials: true,
         methods: ['GET', 'POST'],
     },
@@ -244,40 +247,76 @@ io.use(async (socket, next) => {
     }
 })
 
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
     const userId = socket.data.userId
+    console.log(`[Socket] User connected: ${userId}`)
+
+    // Auto-join personal room to receive real-time notifications
+    socket.join(userId)
+
+    try {
+        // Find existing conversations to join rooms
+        const userConvs = await prisma.conversation.findMany({
+            where: { participants: { some: { id: userId } } },
+            select: { id: true }
+        })
+        console.log(`[Socket] User ${userId} joining ${userConvs.length} rooms`)
+        userConvs.forEach(c => socket.join(c.id))
+    } catch (err) {
+        console.error('[Socket] Auto-join error:', err)
+    }
 
     socket.on('join_room', async (conversationId: string) => {
+        console.log(`[Socket] User ${userId} joining room: ${conversationId}`)
+        socket.join(conversationId)
+    })
+
+    socket.on('send_message', async (data: any) => {
+        if (!data.conversationId || !data.content) return
+        console.log(`[Socket] Message from ${userId} to room ${data.conversationId}`)
+
+        // Broadcast to everyone in the room (including other participants)
+        io.to(data.conversationId).emit('receive_message', {
+            ...data,
+            senderId: userId,
+            sender: data.sender || { id: userId, name: 'User' } // Ensure sender object exists
+        })
+
         try {
-            // SEC-003 fix: verify user is actually a participant of this conversation
-            const conv = await prisma.conversation.findFirst({
-                where: {
-                    id: conversationId,
-                    participants: { some: { id: userId } },
-                },
+            const conv = await prisma.conversation.findUnique({
+                where: { id: data.conversationId },
+                include: { participants: { select: { id: true } } }
             })
-            if (!conv) {
-                socket.emit('error', { message: 'Access denied to this conversation' })
-                return
+            if (conv) {
+                // Also emit notification to individual user rooms to ensure sidebar updates
+                conv.participants.forEach(p => {
+                    if (p.id !== userId) {
+                        io.to(p.id).emit('notification', { 
+                            type: 'new_message', 
+                            conversationId: data.conversationId,
+                            senderId: userId
+                        })
+                    }
+                })
             }
-            socket.join(conversationId)
-        } catch {
-            socket.emit('error', { message: 'Failed to join room' })
+        } catch (err) { 
+            console.error('[Socket] Notification error:', err)
         }
     })
 
-    socket.on('send_message', (data: { conversationId: string; content: string }) => {
-        if (!data.conversationId || !data.content) return
-
-        // Broadcast with the verified server-side userId (not client-supplied)
-        io.to(data.conversationId).emit('receive_message', {
-            ...data,
-            senderId: userId, // Always use server-verified userId
+    socket.on('new_conversation', (data: { conversationId: string, participantId: string }) => {
+        console.log(`[Socket] New conversation initiated: ${data.conversationId}`)
+        socket.join(data.conversationId) // Sender joins
+        // Notify receiver to reload and join
+        io.to(data.participantId).emit('notification', {
+            type: 'new_conversation',
+            conversationId: data.conversationId,
+            senderId: userId
         })
     })
 
     socket.on('disconnect', () => {
-        // Intentionally silent — no need to log every disconnect
+        console.log(`[Socket] User disconnected: ${userId}`)
     })
 })
 

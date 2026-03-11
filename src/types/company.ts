@@ -14,6 +14,7 @@ export interface Comment {
     user: { name: string }
     companyId: string
     parentId?: string | null
+    images: string[]
 }
 
 export interface Company {

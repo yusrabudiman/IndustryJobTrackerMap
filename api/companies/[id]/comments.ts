@@ -44,21 +44,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
 
             const schema = z.object({
-                content: z.string().min(1).max(1000),
+                content: z.string().max(1000).optional(),
                 parentId: z.string().optional().nullable(),
+                images: z.array(z.string()).optional(),
+            }).refine(data => {
+                const hasContent = data.content && data.content.trim().length > 0;
+                const hasImages = data.images && data.images.length > 0;
+                return hasContent || hasImages;
+            }, {
+                message: "Either content or images must be provided"
             })
 
             const validation = schema.safeParse(req.body)
             if (!validation.success) {
-                return res.status(400).json({ error: 'Comment content is required (max 1000 chars)' })
+                return res.status(400).json({ error: validation.error.issues[0]?.message || 'Invalid comment data' })
             }
 
             const comment = await prisma.comment.create({
                 data: {
-                    content: validation.data.content,
+                    content: validation.data.content || "",
                     companyId,
                     userId: user.userId,
                     parentId: validation.data.parentId || undefined,
+                    images: validation.data.images || [],
                 },
                 include: { user: { select: { name: true } } },
             })

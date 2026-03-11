@@ -14,6 +14,7 @@ import DiscussionModal from './components/DiscussionModal'
 import { ChatContainer } from './components/Chat/ChatContainer'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ThemeProvider, useTheme } from './context/ThemeContext'
+import { socketService } from './lib/socket'
 import { getCompanies, createCompany, deleteCompany, updateCompany } from './lib/api'
 import type { Company, CompanyInput } from './types/company'
 import { CompanyStatus } from './types/company'
@@ -33,6 +34,28 @@ function Dashboard() {
     const [error, setError] = useState<string | null>(null)
     const [discussionCompany, setDiscussionCompany] = useState<Company | null>(null)
     const [isChatOpen, setIsChatOpen] = useState(false)
+    const [hasUnreadChats, setHasUnreadChats] = useState(false)
+
+    // Setup global socket connection for notifications and real-time feel
+    useEffect(() => {
+        if (!user) return
+
+        const socket = socketService.connect()
+        
+        const handleNotification = (data: any) => {
+            if (data.type === 'new_message' || data.type === 'new_conversation') {
+                if (!isChatOpen) {
+                    setHasUnreadChats(true)
+                }
+            }
+        }
+
+        socket.on('notification', handleNotification)
+
+        return () => {
+            socket.off('notification', handleNotification)
+        }
+    }, [user, isChatOpen])
 
     const loadCompanies = useCallback(async () => {
         try {
@@ -249,8 +272,9 @@ function Dashboard() {
             >
                 <div className="relative">
                     <MessageCircle className="w-6 h-6" />
-                    {/* Optional: Add a pulse effect to the icon if there are notifications */}
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-danger rounded-full border-2 border-surface animate-pulse hidden" />
+                    {hasUnreadChats && (
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-danger rounded-full border-2 border-surface animate-pulse" />
+                    )}
                 </div>
                 <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out whitespace-nowrap">
                     Private Messages
@@ -267,6 +291,7 @@ function Dashboard() {
             <ChatContainer
                 isOpen={isChatOpen}
                 onClose={() => setIsChatOpen(false)}
+                onOpen={() => setHasUnreadChats(false)}
             />
         </div>
     )

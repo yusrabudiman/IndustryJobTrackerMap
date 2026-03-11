@@ -7,7 +7,28 @@ class SocketService {
 
     connect() {
         if (!this.socket) {
-            this.socket = io(SOCKET_URL);
+            // Determine API URL: Use port 3001 on the same host in development
+            const url = window.location.port === '5173' 
+                ? `${window.location.protocol}//${window.location.hostname}:3001`
+                : '';
+            
+            console.log('[Socket] Attempting connection to:', url || 'same-origin');
+            
+            this.socket = io(url, {
+                withCredentials: true,
+                transports: ['websocket', 'polling'],
+                reconnection: true,
+                reconnectionAttempts: 10,
+                reconnectionDelay: 1000
+            });
+
+            this.socket.on('connect', () => {
+                console.log('[Socket] Connected to server');
+            });
+
+            this.socket.on('connect_error', (error) => {
+                console.error('[Socket] Connection error:', error);
+            });
         }
         return this.socket;
     }
