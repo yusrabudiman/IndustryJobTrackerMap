@@ -12,6 +12,8 @@ import {
     BarChart3,
     CheckCircle2
 } from 'lucide-react'
+import AIChatAssistant from './AIChatAssistant'
+
 
 interface LandingPageProps {
     onGetStarted: () => void
@@ -356,6 +358,9 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                     <p className="landing-footer-copy">© 2026 JobTracker. Built with ❤️ for food industry professionals.</p>
                 </div>
             </footer>
+
+            <AIChatAssistant />
         </div>
     )
 }
+

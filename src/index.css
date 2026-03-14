@@ -217,6 +217,33 @@ html[data-theme='light'] {
   color: #475569;
 }
 
+/* ───── AI Chat Animations ───── */
+@keyframes chat-in {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.ai-chat-window {
+  animation: chat-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes typing {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.ai-typing-dot {
+  width: 4px;
+  height: 4px;
+  background: currentColor;
+  border-radius: 50%;
+  animation: typing 1s infinite ease-in-out;
+}
+
+.ai-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.ai-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+
 /* ───── Auth Page ───── */
 .auth-page {
   width: 100%;
@@ -439,6 +466,15 @@ html[data-theme='light'] {
   75% {
     transform: translateX(6px);
   }
+}
+
+@keyframes ai-zoom-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+.animate-ai-zoom {
+  animation: ai-zoom-pulse 2s infinite ease-in-out;
 }
 
 .auth-field {
