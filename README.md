@@ -24,6 +24,7 @@ Track your food industry job applications on an interactive map. Visualize your 
 - 🛡️ **Smart Admin Setup** — First-run logic automatically assigns the first registered user as Admin
 - 🔍 **Status Filters** — Toggle marker visibility by application status
 - 🌙 **Dark Mode** — Beautiful dark theme with glassmorphism UI
+- 🤖 **JobTracker AI Assistant** — Personal AI guide using Gemini 2.5 Flash with full-screen mode, horizontal suggestions, and transcript download (.doc)
 - ☁️ **Cloud Native** — Vercel serverless + Prisma Accelerate + PostgreSQL
 
 ## Tech Stack
@@ -37,6 +38,7 @@ Track your food industry job applications on an interactive map. Visualize your 
 | Auth      | JWT (Jose) + Bcrypt.js               |
 | ORM       | Prisma Client + Accelerate           |
 | Database  | PostgreSQL (via Prisma Data Platform)|
+| AI Model  | Google Gemini 2.5 Flash / High       |
 | Validation| Zod                                  |
 
 ## Project Structure
@@ -53,6 +55,7 @@ Track your food industry job applications on an interactive map. Visualize your 
 │   └── migrations/          # Database migrations
 ├── src/
 │   ├── components/
+|   |   ├── Chat/            # Chat Socket io components
 │   │   ├── LandingPage.tsx  # Premium intro page
 │   │   ├── AuthPage.tsx     # Sign In / Sign Up UI
 │   │   ├── LocationSearch.tsx # Search for companies & locations
@@ -61,9 +64,11 @@ Track your food industry job applications on an interactive map. Visualize your 
 │   │   ├── CompanyForm.tsx  # Add company form with visibility toggle
 │   │   ├── CompanyList.tsx  # Tracked companies with visibility badges & discussion icons
 │   │   ├── DiscussionModal.tsx # Forum-style discussion & reply system
-│   │   └── StatusFilter.tsx # Filter markers by status
+│   │   ├── StatusFilter.tsx # Filter markers by status
+│   │   └── AIChatAssistant.tsx # Personal AI Assistant with Gemini integration
 │   ├── context/
-│   │   └── AuthContext.tsx  # Global authentication state manager
+│   │   ├── AuthContext.tsx  # Global authentication state manager
+│   │   └── ThemeContext.tsx # Global theme state manager
 │   ├── lib/
 │   │   ├── api.ts           # Frontend API client (auth & companies)
 │   │   ├── jwt.ts           # Server-side JWT utilities
@@ -90,6 +95,7 @@ The following items are excluded from the repository for security and efficiency
 - **`generated/`**: Contains the auto-generated Prisma Client code. Re-created by `npm run prisma:generate`.
 - **`.vercel/`**: Local cache and link configuration for Vercel deployment. Re-created when running `vercel` commands.
 - **`*.log`**: Temporary error or debug logs produced by the system (e.g., `npm-debug.log`). Safe to ignore or delete.
+
 
 ## Local Development
 
@@ -119,6 +125,10 @@ The following items are excluded from the repository for security and efficiency
    # 2. JWT_SECRET
    # Enter any strong random string here to sign your authentication tokens
    JWT_SECRET="your-super-long-random-secret-key-here"
+
+   # 3. VITE_GEMINI_API_KEY
+   # Get this from Google AI Studio (https://aistudio.google.com/)
+   VITE_GEMINI_API_KEY="your-gemini-api-key-here"
    ```
 
    > **Note on Admin Setup:** The very first user to register on an empty database will automatically be granted the **ADMIN** role.
@@ -158,6 +168,7 @@ The following items are excluded from the repository for security and efficiency
 3. **Set environment variables** in the Vercel dashboard:
    - `DATABASE_URL` → Your Prisma Accelerate Accelerated URL
    - `JWT_SECRET` → A strong random string for auth tokens
+   - `VITE_GEMINI_API_KEY` → Your Gemini API key
 
 4. **Done!** The build command automatically runs `prisma generate` before building.
 
