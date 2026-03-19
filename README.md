@@ -1,6 +1,6 @@
-# 🍔 Food-Industry Tracker Map
+# Industry Tracker Map
 
-Track your food industry applications on an interactive map. Visualize your F&B, FMCG, and food manufacturing career journey.
+Track your food industry applications on an interactive map. Visualize your F&B, FMCG, and food manufacturing, Technology.
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black)
