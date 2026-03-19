@@ -211,14 +211,12 @@ Add a new comment or reply (@mention) to a company discussion.
 }
 ```
 
-## Marker Colors
+## 🙏 Acknowledgments 
 
-| Status              | Color        |
-|---------------------|--------------|
-| JOINED / OFFERED    | 🟢 Green     |
-| INTERVIEW           | 🟡 Yellow    |
-| APPLIED             | ⚪ Gray      |
-| REJECTED            | 🔴 Red       |
+### This platform is an Colaboration initiative designed to empower fresh graduates by providing transparent information about the job market. Our primary focus is to protect job seekers from the rising threat of job vacancy fraud and scams that often target entry-level candidates. Through community-driven data, we aim to help talent navigate their early career journey with more confidence and security 🙏.
+### We believe that a healthy recruitment ecosystem starts with transparency. This project is not intended to discredit any specific organization, but rather to foster a more professional and supportive environment for the next generation of workers.🙏"
+
+
 
 ## License
 
