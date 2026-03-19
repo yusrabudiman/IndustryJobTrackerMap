@@ -183,15 +183,15 @@ Create a new company.
 **Body:**
 ```json
 {
-  "name": "PT Mie Enak",
+  "name": "Mie Enak",
   "subSector": "Manufacturing",
   "latitude": -6.21,
   "longitude": 106.82,
-  "status": "INTERVIEW",
+  "status": "Success",
   "ratingSalary": 4,
   "ratingStability": 3,
   "ratingCulture": 5,
-  "notes": "HR friendly, lokasi oke"
+  "notes": "Suasana nya Mantap"
 }
 ```
 
