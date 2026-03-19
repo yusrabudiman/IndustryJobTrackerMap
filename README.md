@@ -1,6 +1,6 @@
-# 🍔 Food-Industry Job Tracker Map
+# 🍔 Food-Industry Tracker Map
 
-Track your food industry job applications on an interactive map. Visualize your F&B, FMCG, and food manufacturing career journey.
+Track your food industry applications on an interactive map. Visualize your F&B, FMCG, and food manufacturing career journey.
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black)
@@ -24,7 +24,7 @@ Track your food industry job applications on an interactive map. Visualize your 
 - 🛡️ **Smart Admin Setup** — First-run logic automatically assigns the first registered user as Admin
 - 🔍 **Status Filters** — Toggle marker visibility by application status
 - 🌙 **Dark Mode** — Beautiful dark theme with glassmorphism UI
-- 🤖 **JobTracker AI Assistant** — Personal AI guide using Gemini 2.5 Flash with full-screen mode, horizontal suggestions, and transcript download (.doc)
+- 🤖 **Tracker AI Assistant** — Personal AI guide using Gemini 2.5 Flash with full-screen mode, horizontal suggestions, and transcript download (.doc)
 - ☁️ **Cloud Native** — Vercel serverless + Prisma Accelerate + PostgreSQL
 
 ## Tech Stack
@@ -212,7 +212,7 @@ Add a new comment or reply (@mention) to a company discussion.
 ```
 
 ## 🙏 Acknowledgments 
-This platform is an Colaboration initiative designed to empower fresh graduates by providing transparent information about the job market. Our primary focus is to protect job seekers from the rising threat of job vacancy fraud and scams that often target entry-level candidates. Through community-driven data, we aim to help talent navigate their early career journey with more confidence and security 🙏.
+This platform is an Collaboration initiative designed to empower fresh graduates by providing transparent information about the Tracker Map. Our primary focus is to protect organization and community seekers from the rising threat of tracker map company vacancy fraud and scams that often target entry-level candidates. Through community-driven data, we aim to help talent navigate their early career journey with more confidence and security 🙏.
 
 We believe that a healthy recruitment ecosystem starts with transparency. This project is not intended to discredit any specific organization, but rather to foster a more professional and supportive environment for the next generation of workers.🙏"
 
