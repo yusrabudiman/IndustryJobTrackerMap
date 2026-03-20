@@ -1,6 +1,6 @@
-# Industry Tracker Map
+# Industry Job Tracker Map
 
-Track your food industry applications on an interactive map. Visualize your F&B, FMCG, and food manufacturing, Technology.
+Track your food industry applications on an interactive map. Visualize your F&B, FMCG, and food manufacturing, Career Technology.
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black)
@@ -210,6 +210,14 @@ Add a new comment or reply (@mention) to a company discussion.
   "parentId": "optional_comment_id_for_replies"
 }
 ```
+## Marker
+| Status              | Color        |
+|---------------------|--------------|
+| JOINED / OFFERED    | 🟢 Green     |
+| INTERVIEW           | 🟡 Yellow    |
+| APPLIED             | ⚪ Gray      |
+| REJECTED            | 🔴 Red       |
+
 
 ## 🙏 Acknowledgments 
 This platform is an Collaboration initiative designed to empower fresh graduates by providing transparent information about the Tracker Map. Our primary focus is to protect organization and community seekers from the rising threat of tracker map company vacancy fraud and scams that often target entry-level candidates. Through community-driven data, we aim to help talent navigate their early career journey with more confidence and security 🙏.
